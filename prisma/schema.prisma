@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model device {
+  device_id            String  @id @db.VarChar(18)
+  latest_device_log_id Int
+  intranet_array       String  @db.VarChar(300)
+  extranet_array       String  @db.VarChar(300)
+  heartbeat            String  @db.VarChar(3)
+  is_online            Boolean
+}
+
+model device_change_log {
+  id                  Int       @id @default(autoincrement())
+  device_id           String?   @db.VarChar(18)
+  device_log_before   Int
+  device_log_after    Int
+  online              Boolean
+  update_time         DateTime? @db.DateTime(0)
+  card_number         Boolean?
+  iccid               Boolean?
+  electric            Boolean?
+  ethernet            Boolean?
+  ip                  Boolean?
+  gateway             Boolean?
+  intranet_ping       Boolean?
+  intranet_ping_large Boolean?
+  intranet_ping_array Boolean?
+  extranet_ping       Boolean?
+  extranet_ping_large Boolean?
+}
+
+model device_log {
+  id                  Int       @id @default(autoincrement())
+  device_id           String?   @db.VarChar(18)
+  update_time         DateTime? @db.DateTime(0)
+  card_number         String?   @db.VarChar(15)
+  iccid               String?   @db.VarChar(21)
+  electric            String?   @db.VarChar(15)
+  ethernet            String?   @db.VarChar(15)
+  ip                  String?   @db.VarChar(15)
+  gateway             String?   @db.VarChar(15)
+  intranet_ping       String?   @db.VarChar(8)
+  intranet_ping_large String?   @db.VarChar(8)
+  intranet_ping_array String?   @db.VarChar(300)
+  extranet_ping       String?   @db.VarChar(8)
+  extranet_ping_large String?   @db.VarChar(8)
+  importance_level    Boolean?
+}
