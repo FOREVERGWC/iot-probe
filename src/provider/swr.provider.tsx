@@ -19,7 +19,8 @@ export const SWRProvider = ({ children }: React.PropsWithChildren<{}>) => {
       value={{
         onError: (error, key) => {
           if (error instanceof TRPCClientError) {
-            switch (error.data.code) {
+            console.error(error.message);
+            switch (error.data) {
               case "UNAUTHORIZED": {
                 // toast.error("请先登录");
                 // if (pathname !== routes.login) {

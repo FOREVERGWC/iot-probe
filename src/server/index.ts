@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { procedure, router } from "./trpc";
 import prisma from "@/libs/db";
+// import { diff } from "json-diff-ts";
 
 export const appRouter = router({
   hello: procedure
@@ -38,6 +39,37 @@ export const appRouter = router({
         device,
         lastLog,
       };
+    }),
+  deviceChangeLog: procedure
+    .input(
+      z.object({
+        device_id: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const logs = await prisma.device_change_log.findMany({
+        where: {
+          device_id: input.device_id,
+        },
+        take: 5,
+        orderBy: {
+          update_time: "desc",
+        },
+      });
+      // for (let log of logs) {
+      //   const before = await prisma.device_change_log.findUniqueOrThrow({
+      //     where: {
+      //       id: log.device_log_before,
+      //     },
+      //   });
+      //   const after = await prisma.device_change_log.findUniqueOrThrow({
+      //     where: {
+      //       id: log.device_log_after,
+      //     },
+      //   });
+      //   // log.diff = diff(log.old_data, log.new_data);
+      // }
+      return logs;
     }),
 });
 // export type definition of API

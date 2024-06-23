@@ -2,6 +2,7 @@ import SuperJSON from "superjson";
 import { httpBatchLink } from "@trpc/client";
 import type { AppRouter } from "@/server";
 import { createSWRProxyHooks } from "@trpc-swr/client";
+import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -30,3 +31,6 @@ export const api = createSWRProxyHooks<AppRouter>({
   ], // @ts-ignore
   // transformer: SuperJSON,
 });
+
+export type RouterInput = inferRouterInputs<AppRouter>;
+export type RouterOutput = inferRouterOutputs<AppRouter>;

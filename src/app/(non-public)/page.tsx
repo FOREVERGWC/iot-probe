@@ -8,8 +8,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import Loading from "@/components/loading";
 
 const Row: React.FC<{
   label: string;
@@ -27,7 +44,7 @@ export default function Home() {
   const { data } = api.devices.useSWR();
 
   if (!data) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
@@ -48,7 +65,20 @@ export default function Home() {
                 </Badge>
               </Row>
               <Row label="心跳">{device.heartbeat}</Row>
-              <Row label="最后日志 ID">{device.latest_device_log_id}</Row>
+              <Dialog>
+                <DialogTrigger>
+                  <Row label="最后日志 ID">{device.latest_device_log_id}</Row>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </Link>
