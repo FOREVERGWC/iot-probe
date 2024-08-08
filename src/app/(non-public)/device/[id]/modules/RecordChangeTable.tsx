@@ -127,6 +127,7 @@ const RecordChangeTable: React.FC<{
 
   const { data, isLoading } = api.deviceChangeLog.useSWR({ device_id });
 
+  // @ts-ignore
   const table = useReactTable({
     data: data!,
     // @ts-ignore
