@@ -27,6 +27,9 @@ export default function RootLayout({
         )}
       >
         <SWRProvider>{children}</SWRProvider>
+        <footer className="text-center py-4">
+          <p>Copyright © 2023-2024 徐州九溪云商贸有限公司 All Rights Reserved 版权所有 <a target="_blank" href="https://beian.miit.gov.cn/">苏ICP备2024095635号</a></p>
+        </footer>
       </body>
     </html>
   );
