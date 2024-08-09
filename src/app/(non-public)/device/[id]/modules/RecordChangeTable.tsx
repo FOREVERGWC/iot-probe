@@ -13,20 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -35,88 +22,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api, RouterOutput } from "@/utils/trpc";
+import { api } from "@/utils/trpc";
 import { cn } from "@/libs/utils";
 import Loading from "@/app/loading";
-import { formattedDate } from "@/utils/time";
+import {CardHeader, CardTitle} from "@/components/ui/card";
+import {ChangeLog} from "@/app/(non-public)/device/[id]/modules/types";
 
-type ChangeLog = RouterOutput["deviceChangeLog"][number];
-
-export const columns: ColumnDef<ChangeLog>[] = [
-  {
-    accessorKey: "update_time",
-    header: "时间",
-    cell: ({ row }) => {
-      return <p>{formattedDate(new Date(row.getValue("update_time")))}</p>;
-    },
-  },
-  {
-    accessorKey: "online",
-    header: "状态",
-    cell: ({ row }) => {
-      return <p>{row.getValue("online") ? "上线" : "离线"}</p>;
-    },
-  },
-  {
-    id: "日志",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return <Button>查看</Button>;
-    },
-  },
-];
-
-export const columns2: ColumnDef<ChangeLog>[] = [
-  {
-    accessorKey: "update_time",
-    header: "时间",
-    cell: ({ row }) => {
-      return <p>{formattedDate(new Date(row.getValue("update_time")))}</p>;
-    },
-  },
-  {
-    accessorKey: "online",
-    header: "状态",
-    cell: ({ row }) => {
-      return <p>{row.getValue("online") ? "上线" : "离线"}</p>;
-    },
-  },
-  {
-    id: "日志",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return <Button>查看</Button>;
-    },
-  },
-];
-
-export const columns3: ColumnDef<ChangeLog>[] = [
-  {
-    accessorKey: "update_time",
-    header: "时间",
-    cell: ({ row }) => {
-      return <p>{formattedDate(new Date(row.getValue("update_time")))}</p>;
-    },
-  },
-  {
-    accessorKey: "online",
-    header: "状态",
-    cell: ({ row }) => {
-      return <p>{row.getValue("online") ? "上线" : "离线"}</p>;
-    },
-  },
-  {
-    id: "日志",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return <Button>查看</Button>;
-    },
-  },
-];
 const RecordChangeTable: React.FC<{
+  title?: string;
   device_id: string;
   className?: string;
-}> = ({ device_id, className }) => {
+  columns: ColumnDef<ChangeLog>[];
+}> = ({ title, device_id, className, columns }) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -129,9 +46,10 @@ const RecordChangeTable: React.FC<{
 
   // @ts-ignore
   const table = useReactTable({
+    // @ts-ignore
     data: data!,
     // @ts-ignore
-    columns,
+    columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -154,6 +72,11 @@ const RecordChangeTable: React.FC<{
 
   return (
     <div className={cn("w-full rounded-md border", className)}>
+      {title && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+      )}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

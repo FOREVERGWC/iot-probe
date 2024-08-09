@@ -25,8 +25,8 @@ model device_change_log {
   update_time         DateTime? @db.DateTime(0)
   card_number         Boolean?
   iccid               Boolean?
-  electric            Boolean?
-  ethernet            Boolean?
+  electric            Int?
+  ethernet            Int?
   ip                  Boolean?
   gateway             Boolean?
   intranet_ping       Boolean?
@@ -51,5 +51,9 @@ model device_log {
   intranet_ping_array String?   @db.VarChar(300)
   extranet_ping       String?   @db.VarChar(8)
   extranet_ping_large String?   @db.VarChar(8)
+  serial_rx           String?   @db.VarChar(1000)
+  serial_tx           String?   @db.VarChar(200)
+  signal_quality_rssi Int
+  firmware_version    String    @db.VarChar(50)
   importance_level    Boolean?
 }

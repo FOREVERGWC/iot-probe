@@ -9,17 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -49,7 +41,7 @@ export default function Home() {
 
   return (
     <main className="grid min-h-screen grid-cols-1 base:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-24 mx-auto">
-      {data.map((device) => (
+      {data.map((device: any) => (
         <Link key={device.device_id} href={`/device/${device.device_id}`}>
           <Card className="w-72">
             <CardHeader>
@@ -57,14 +49,22 @@ export default function Home() {
               <CardDescription></CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Row label="Status">
+              <Row label="状态">
                 <Badge
                   className={device.is_online ? "bg-green-500" : "bg-red-500"}
                 >
                   {device.is_online ? "在线" : "离线"}
                 </Badge>
               </Row>
-              <Row label="心跳">{device.heartbeat}</Row>
+              <Row label="电源状态">
+                <Badge
+                    className={device.device_log?.electric === 'correct' ? "bg-green-500" : "bg-red-500"}
+                >
+                  {device.device_log?.electric === 'correct' ? '正常' : '断电'}
+                </Badge>
+              </Row>
+              <Row label="信号强度">{device.device_log?.signal_quality_rssi}</Row>
+              <Row label="固件版本">{device.device_log?.firmware_version}</Row>
               <Dialog>
                 <DialogTrigger>
                   <Row label="最后日志 ID">{device.latest_device_log_id}</Row>
