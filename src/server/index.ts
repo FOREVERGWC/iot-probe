@@ -20,7 +20,7 @@ export const appRouter = router({
     if (devices.length === 0) {
       return [];
     }
-    const deviceLogIds = devices.map(item => item.latest_device_log_id);
+    const deviceLogIds = devices.map((item: any) => item.latest_device_log_id);
     const deviceLogs = await prisma.device_log.findMany({
       where: {
         id: {
