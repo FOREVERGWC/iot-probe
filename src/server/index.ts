@@ -35,7 +35,7 @@ export const appRouter = router({
       }
     }
 
-    return devices.map(device => ({
+    return devices.map((device: any) => ({
       ...device,
       device_log: latestLogsMap.get(device.device_id) || null,
     }));
