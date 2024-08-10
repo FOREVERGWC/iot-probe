@@ -20,7 +20,8 @@ export const columns: ColumnDef<ChangeLog>[] = [
         accessorKey: "online",
         header: "状态",
         cell: ({ row }) => {
-            return <p>{row.getValue("online") ? "上线" : "离线"}</p>;
+            const value = row.getValue("online");
+            return <p>{value === -1 ? "上线" : (value ? "离线" : "异常")}</p>;
         },
     },
     {

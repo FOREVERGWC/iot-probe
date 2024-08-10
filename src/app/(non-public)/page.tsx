@@ -58,9 +58,8 @@ export default function Home() {
               </Row>
               <Row label="电源状态">
                 <Badge
-                    className={device.device_log?.electric === 'correct' ? "bg-green-500" : "bg-red-500"}
-                >
-                  {device.device_log?.electric === 'correct' ? '正常' : '断电'}
+                    className={device.is_online ? (device.device_log?.electric === 'correct' ? "bg-green-500" : "bg-red-500") : "bg-gray-500"}>
+                  {device.is_online ? (device.device_log?.electric === 'correct' ? '正常' : '断电') : '未知'}
                 </Badge>
               </Row>
               <Row label="信号强度">{device.device_log?.signal_quality_rssi}</Row>

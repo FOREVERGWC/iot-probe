@@ -74,9 +74,8 @@ export default function Page({ params }: { params: { id: string } }) {
             </Row>
             <Row label="电源状态">
               <Badge
-                  className={data.lastLog?.electric === 'correct' ? "bg-green-500" : "bg-red-500"}
-              >
-                {data.lastLog?.electric === 'correct' ? '正常' : '断电'}
+                  className={data.device.is_online ? (data.lastLog?.electric === 'correct' ? "bg-green-500" : "bg-red-500") : "bg-gray-500"}>
+                {data.device.is_online ? (data.lastLog?.electric === 'correct' ? '正常' : '断电') : '未知'}
               </Badge>
             </Row>
             <Row label="信号强度">{data.lastLog.signal_quality_rssi}</Row>
@@ -104,9 +103,8 @@ export default function Page({ params }: { params: { id: string } }) {
             <CardTitle>电源状态</CardTitle>
             <Row label="电源状态">
               <Badge
-                  className={data.lastLog?.electric === 'correct' ? "bg-green-500" : "bg-red-500"}
-              >
-                {data.lastLog?.electric === 'correct' ? '正常' : '断电'}
+                  className={data.device.is_online ? (data.lastLog?.electric === 'correct' ? "bg-green-500" : "bg-red-500") : "bg-gray-500"}>
+                {data.device.is_online ? (data.lastLog?.electric === 'correct' ? '正常' : '断电') : '未知'}
               </Badge>
             </Row>
           </CardHeader>

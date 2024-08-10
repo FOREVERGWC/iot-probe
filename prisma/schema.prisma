@@ -21,7 +21,7 @@ model device_change_log {
   device_id           String?   @db.VarChar(18)
   device_log_before   Int
   device_log_after    Int
-  online              Boolean
+  online              Int
   update_time         DateTime? @db.DateTime(0)
   card_number         Boolean?
   iccid               Boolean?
