@@ -22,10 +22,8 @@ export const SWRProvider = ({ children }: React.PropsWithChildren<{}>) => {
             console.error(error.message);
             switch (error.data) {
               case "UNAUTHORIZED": {
-                // toast.error("请先登录");
-                // if (pathname !== routes.login) {
-                //   router.push(`${routes.login}?callback=${pathname}`);
-                // }
+                toast.error("请先登录");
+                router.push(`/login?callback=${pathname}`);
                 break;
               }
               case "BAD_REQUEST": {

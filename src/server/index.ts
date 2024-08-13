@@ -1,20 +1,131 @@
 import {z} from "zod";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import {procedure, router} from "./trpc";
 import prisma from "@/libs/db";
 // import { diff } from "json-diff-ts";
+const JWT_SECRET = process.env.JWT_SECRET || '';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 export const appRouter = router({
-  hello: procedure
-    .input(
-      z.object({
-        text: z.string(),
-      }),
-    )
-    .query((opts) => {
-      return {
-        greeting: `hello ${opts.input.text}`,
-      };
-    }),
+    register: procedure
+        .input(
+            z.object({
+                username: z.string().max(20),
+                password: z.string().min(6).max(80),
+                phone: z
+                    .string()
+                    .max(20)
+                    .regex(
+                        /^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
+                        { message: "无效的电话号码格式" }
+                    ),
+                remark: z.string().max(50).optional(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            const { username, password, phone, remark } = input;
+
+            const existingUserByUsername = await prisma.user.findFirst({
+                where: { username },
+            });
+            if (existingUserByUsername) {
+                throw new Error("注册失败！该用户名已存在");
+            }
+            const existingUserByPhone = await prisma.user.findFirst({
+                where: { phone },
+            });
+            if (existingUserByPhone) {
+                throw new Error("注册失败！该手机号已注册");
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const user = await prisma.user.create({
+                data: {
+                    username,
+                    password: hashedPassword,
+                    phone,
+                    level: 1,
+                    remark: remark || ""
+                },
+            });
+
+            return {
+                msg: "注册成功！",
+                user: {
+                    id: user.id,
+                    username: user.username,
+                },
+            };
+        }),
+    login: procedure
+        .input(
+            z.object({
+                username: z.string().min(1, { message: "用户名不能为空" }).max(20),
+                password: z.string().min(1, { message: "密码不能为空" }).max(80),
+            })
+        )
+        .mutation(async ({ input }) => {
+            const { username, password } = input;
+
+            const user = await prisma.user.findFirst({
+                where: { username },
+            });
+            if (!user) {
+                throw new Error("登陆失败！用户名或密码错误");
+            }
+
+            const isValidPassword = await bcrypt.compare(password, user.password);
+            if (!isValidPassword) {
+                throw new Error("登陆失败！用户名或密码错误");
+            }
+
+            const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+                expiresIn: JWT_EXPIRES_IN,
+            });
+
+            return {
+                msg: "请求成功！",
+                token,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                },
+            };
+        }),
+    sendVerificationCode: procedure
+        .input(
+            z.object({
+                phone: z
+                    .string()
+                    .max(20)
+                    .regex(
+                        /^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
+                        { message: "无效的电话号码格式" }
+                    ),
+            })
+        )
+        .mutation(async ({ input }) => {
+            // TODO 发送验证码的逻辑
+        }),
+    resetPassword: procedure
+        .input(
+            z.object({
+                phone: z
+                    .string()
+                    .max(20)
+                    .regex(
+                        /^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
+                        { message: "无效的电话号码格式" }
+                    ),
+                verificationCode: z.string().min(6),
+                newPassword: z.string().min(1, { message: "密码不能为空" }).max(80)
+            })
+        )
+        .mutation(async ({ input }) => {
+            // TODO 验证验证码并重置密码的逻辑
+        }),
   devices: procedure.query(async () => {
     const devices = await prisma.device.findMany();
     if (devices.length === 0) {
@@ -47,12 +158,15 @@ export const appRouter = router({
       }),
     )
     .query(async ({ input }) => {
-      const device = await prisma.device.findUniqueOrThrow({
+      const device = await prisma.device.findUnique({
         where: {
           device_id: input.id,
         },
       });
-      const lastLog = await prisma.device_log.findUniqueOrThrow({
+      if (!device) {
+          return null;
+      }
+      const lastLog = await prisma.device_log.findUnique({
         where: {
           id: device.latest_device_log_id,
         },
@@ -71,6 +185,59 @@ export const appRouter = router({
         lastChangeLog
       };
     }),
+  createDevice: procedure
+      .input(
+          z.object({
+            device_id: z.string().max(18),
+            latest_device_log_id: z.number().optional(),
+            intranet_array: z.string().max(300),
+            extranet_array: z.string().max(300),
+            heartbeat: z.string().max(3),
+            is_online: z.boolean(),
+            serial_tx: z.string().max(200),
+            alias_name: z.string().max(20).optional(),
+          }),
+      )
+      .mutation(async ({ input }) => {
+        return prisma.device.create({
+            data: {
+                ...input,
+                latest_device_log_id: input.latest_device_log_id ?? 0,
+                alias_name: input.alias_name ?? ''
+            }
+        });
+      }),
+  updateDevice: procedure
+      .input(
+          z.object({
+            device_id: z.string().max(18),
+            latest_device_log_id: z.number().optional(),
+            intranet_array: z.string().max(300).optional(),
+            extranet_array: z.string().max(300).optional(),
+            heartbeat: z.string().max(3).optional(),
+            is_online: z.boolean().optional(),
+            serial_tx: z.string().max(200).optional(),
+            alias_name: z.string().max(20).optional(),
+          }),
+      )
+      .mutation(async ({ input }) => {
+        const { device_id, ...updateData } = input;
+        return prisma.device.update({
+          where: {device_id},
+          data: updateData,
+        });
+      }),
+  deleteDevice: procedure
+      .input(
+          z.object({
+            device_id: z.string().max(18),
+          }),
+      )
+      .mutation(async ({ input }) => {
+        return prisma.device.delete({
+          where: {device_id: input.device_id},
+        });
+      }),
   deviceLogs: procedure.input(
       z.object({
         device_id: z.string()

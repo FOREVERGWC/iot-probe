@@ -3,6 +3,10 @@ import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/libs/utils";
 import { SWRProvider } from "@/provider/swr.provider";
 import { Metadata } from "next";
+import { AuthProvider } from "@/provider/auth.provider";
+import Navbar from "@/components/ui/navbar";
+import React from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -26,7 +30,11 @@ export default function RootLayout({
           fontSans.variable,
         )}
       >
-        <SWRProvider>{children}</SWRProvider>
+        <AuthProvider>
+          <Navbar />
+          <Toaster />
+          <SWRProvider>{children}</SWRProvider>
+        </AuthProvider>
         <footer className="text-center py-4">
           <p>Copyright © 2023-2024 徐州九溪云商贸有限公司 All Rights Reserved 版权所有 <a target="_blank" href="https://beian.miit.gov.cn/">苏ICP备2024095635号</a></p>
         </footer>

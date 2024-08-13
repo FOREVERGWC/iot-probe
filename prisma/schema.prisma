@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model device {
@@ -14,6 +15,9 @@ model device {
   extranet_array       String  @db.VarChar(300)
   heartbeat            String  @db.VarChar(3)
   is_online            Boolean
+  serial_tx            String  @db.VarChar(200)
+  alias_name           String  @db.VarChar(20)
+  user_devices         user_device[]
 }
 
 model device_change_log {
@@ -57,3 +61,22 @@ model device_log {
   firmware_version    String    @db.VarChar(50)
   importance_level    Boolean?
 }
+
+model user {
+  id                  Int       @id @default(autoincrement())
+  username            String    @db.VarChar(20)
+  password            String    @db.VarChar(80)
+  phone               String    @db.VarChar(20)
+  level               Int
+  remark              String    @db.VarChar(50)
+  user_devices        user_device[]
+}
+
+model user_device {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  device_id           String    @db.VarChar(18)
+  user                user      @relation(fields: [user_id], references: [id])
+  device              device    @relation(fields: [device_id], references: [device_id])
+}
+
