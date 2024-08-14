@@ -28,6 +28,7 @@ import DataTable from "@/app/(non-public)/device/[id]/modules/DataTable";
 import IntranetStatusCard from "@/app/(non-public)/device/[id]/modules/IntranetStatusCard";
 import ExtranetStatusCard from "@/app/(non-public)/device/[id]/modules/ExtranetStatusCard";
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
+import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
@@ -86,21 +87,10 @@ export default function Page({ params }: { params: { id: string } }) {
                 </Badge>
               </Row>
               <Row label="电源状态">
-                <Badge
-                    className={
-                      data.device?.is_online
-                          ? data.lastLog?.electric === "correct"
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          : "bg-gray-500"
-                    }
-                >
-                  {data.device?.is_online
-                      ? data.lastLog?.electric === "correct"
-                          ? "正常"
-                          : "断电"
-                      : "未知"}
-                </Badge>
+                <PowerStatus
+                    isOnline={data?.device?.is_online}
+                    electric={data?.lastLog?.electric}
+                />
               </Row>
               <Row label="信号强度">{data?.lastLog?.signal_quality_rssi}</Row>
               <Row label="固件版本">{data?.lastLog?.firmware_version}</Row>
@@ -137,21 +127,10 @@ export default function Page({ params }: { params: { id: string } }) {
             <CardHeader>
               <CardTitle>电源状态</CardTitle>
               <Row label="电源状态">
-                <Badge
-                    className={
-                      data.device.is_online
-                          ? data.lastLog?.electric === "correct"
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          : "bg-gray-500"
-                    }
-                >
-                  {data.device.is_online
-                      ? data.lastLog?.electric === "correct"
-                          ? "正常"
-                          : "断电"
-                      : "未知"}
-                </Badge>
+                <PowerStatus
+                    isOnline={data?.device?.is_online}
+                    electric={data?.lastLog?.electric}
+                />
               </Row>
             </CardHeader>
           </Card>

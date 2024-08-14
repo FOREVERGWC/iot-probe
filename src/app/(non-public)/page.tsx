@@ -17,6 +17,7 @@ import UserDeviceFormDialog from "@/app/(non-public)/device/modules/UserDeviceFo
 import EmptyState from "@/components/ui/empty";
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
 import { Edit, Plus, Trash } from "lucide-react";
+import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 
 export default function Home() {
     const { data, mutate } = api.devices.useSWR();
@@ -72,21 +73,10 @@ export default function Home() {
                                         </Badge>
                                     </Row>
                                     <Row label="电源状态">
-                                        <Badge
-                                            className={
-                                                device.is_online
-                                                    ? device.device_log?.electric === "correct"
-                                                        ? "bg-green-500"
-                                                        : "bg-red-500"
-                                                    : "bg-gray-500"
-                                            }
-                                        >
-                                            {device.is_online
-                                                ? device.device_log?.electric === "correct"
-                                                    ? "正常"
-                                                    : "断电"
-                                                : "未知"}
-                                        </Badge>
+                                        <PowerStatus
+                                            isOnline={device.is_online}
+                                            electric={device.device_log?.electric}
+                                        />
                                     </Row>
                                     <Row label="信号强度">
                                         {device.device_log?.signal_quality_rssi}
