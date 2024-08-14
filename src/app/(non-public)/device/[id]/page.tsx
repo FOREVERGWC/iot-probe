@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { api } from "@/utils/trpc";
 import {
   Card,
@@ -12,7 +11,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import Back from "@/components/ui/back";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/loading";
 import { base64Decode, formattedDate, base64Encode } from "@/utils/time";
@@ -36,6 +34,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation();
 
   const [serialTx, setSerialTx] = useState("");
+  const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -62,6 +61,10 @@ export default function Page({ params }: { params: { id: string } }) {
     await mutate();
   };
 
+  const scrollToHistory = () => {
+    historyRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   if (!data) {
     return <Loading />;
   }
@@ -69,46 +72,37 @@ export default function Page({ params }: { params: { id: string } }) {
   return (
       <div className="relative p-4 md:p-10">
         <div className="absolute top-4 left-4 z-50">
-          <Back/>
+          <Back />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 md:p-10">
           <Card className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2">
             <CardHeader>
               <CardTitle>探针</CardTitle>
-              <CardDescription>{data?.device?.device_id}【{data?.device?.alias_name || data?.device?.device_id}】</CardDescription>
+              <CardDescription>
+                {data?.device?.device_id}【{data?.device?.alias_name || data?.device?.device_id}】
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <Row label="状态">
                 <OnlineStatus isOnline={data?.device?.is_online} />
               </Row>
               <Row label="电源状态">
-                <PowerStatus
-                    isOnline={data?.device?.is_online}
-                    electric={data?.lastLog?.electric}
-                />
+                <PowerStatus isOnline={data?.device?.is_online} electric={data?.lastLog?.electric} />
               </Row>
               <Row label="信号强度">{data?.lastLog?.signal_quality_rssi}</Row>
               <Row label="固件版本">{data?.lastLog?.firmware_version}</Row>
-              <Row label="最后日志 ID">
-                {data?.device?.latest_device_log_id}
-              </Row>
-              <Row label="最后上线于">
-                {formattedDate(data.lastLog?.update_time)}
-              </Row>
+              <Row label="最后日志 ID">{data?.device?.latest_device_log_id}</Row>
+              <Row label="最后上线于">{formattedDate(data.lastLog?.update_time)}</Row>
             </CardContent>
             <CardFooter>
-              <Button>查看历史日志</Button>
+              <Button onClick={scrollToHistory}>查看历史日志</Button>
             </CardFooter>
           </Card>
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>有线网络</CardTitle>
-              <Row label="设备 IP">
-                {data?.device?.intranet_array.split(",")[0]}
-              </Row>
-              <Row label="网关 IP">
-                {data?.device?.intranet_array.split(",")[1]}
-              </Row>
+              <Row label="设备 IP">{data?.device?.intranet_array.split(",")[0]}</Row>
+              <Row label="网关 IP">{data?.device?.intranet_array.split(",")[1]}</Row>
               <Row label="以太网状态">
                 {data.lastChangeLog?.ethernet === -1
                     ? "正常"
@@ -122,10 +116,7 @@ export default function Page({ params }: { params: { id: string } }) {
             <CardHeader>
               <CardTitle>电源状态</CardTitle>
               <Row label="电源状态">
-                <PowerStatus
-                    isOnline={data?.device?.is_online}
-                    electric={data?.lastLog?.electric}
-                />
+                <PowerStatus isOnline={data?.device?.is_online} electric={data?.lastLog?.electric} />
               </Row>
             </CardHeader>
           </Card>
@@ -138,9 +129,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>最新消息</CardTitle>
-              <Row label="接收数据">
-                {base64Decode(data?.lastLog?.serial_rx)}
-              </Row>
+              <Row label="接收数据">{base64Decode(data?.lastLog?.serial_rx)}</Row>
               <Row label="发送数据">
                 <input
                     className="w-full p-2 border rounded"
@@ -168,34 +157,14 @@ export default function Page({ params }: { params: { id: string } }) {
                 onSuccess={mutate}
             />
           </div>
-          <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <RecordChangeTable
-                title="设备状态"
-                device_id={params.id}
-                columns={columns}
-            />
-            <RecordChangeTable
-                title="电源状态"
-                device_id={params.id}
-                columns={columns2}
-            />
-            <RecordChangeTable
-                title="以太网状态"
-                device_id={params.id}
-                columns={columns3}
-            />
+          <div ref={historyRef} className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <RecordChangeTable title="设备状态" device_id={params.id} columns={columns} />
+            <RecordChangeTable title="电源状态" device_id={params.id} columns={columns2} />
+            <RecordChangeTable title="以太网状态" device_id={params.id} columns={columns3} />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DataTable
-                title="接收数据"
-                device_id={params.id}
-                columns={columns5}
-            />
-            <DataTable
-                title="发送数据"
-                device_id={params.id}
-                columns={columns4}
-            />
+            <DataTable title="接收数据" device_id={params.id} columns={columns5} />
+            <DataTable title="发送数据" device_id={params.id} columns={columns4} />
           </div>
         </div>
       </div>
