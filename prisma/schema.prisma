@@ -16,9 +16,9 @@ model device {
   heartbeat            String  @db.VarChar(3)
   is_online            Boolean
   serial_tx            String  @db.VarChar(200)
-  alias_name           String  @db.VarChar(20)
+  alias_name           String  @db.VarChar(20) @default("")
   user_id              Int?
-  user                 user?     @relation(fields: [user_id], references: [id])
+  user                 user?   @relation(fields: [user_id], references: [id])
 }
 
 model device_change_log {
