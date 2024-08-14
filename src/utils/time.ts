@@ -20,9 +20,27 @@ export const formattedDate = (date: any) => {
  * base64字符串解码
  * @param value 字符串
  */
-export const base64Encoded = (value: string | null| undefined) => {
+export const base64Decode = (value: string | null| undefined) => {
     if (!value) {
         return "暂无信息"
     }
     return atob(value);
+};
+
+/**
+ * base64字符串编码
+ * @param value 字符串
+ */
+export const base64Encode = (value: string): string => {
+    if (!value) {
+        return '';
+    }
+    try {
+        const utf8Value = encodeURIComponent(value)
+            .replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16)));
+        return btoa(utf8Value);
+    } catch (e) {
+        console.error("Base64 编码失败:", e);
+        return '';
+    }
 };

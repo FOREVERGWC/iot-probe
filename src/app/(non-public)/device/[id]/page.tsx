@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useEffect } from "react";
 import { api } from "@/utils/trpc";
 import {
@@ -14,7 +15,7 @@ import Back from "@/components/ui/back";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/loading";
-import { base64Encoded, formattedDate } from "@/utils/time";
+import { base64Decode, formattedDate, base64Encode } from "@/utils/time";
 import RecordChangeTable from "@/app/(non-public)/device/[id]/modules/RecordChangeTable";
 import {
   columns,
@@ -30,6 +31,9 @@ import Row from "@/app/(non-public)/device/[id]/modules/Row";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
+  const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation();
+
+  const [serialTx, setSerialTx] = useState("");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,6 +42,23 @@ export default function Page({ params }: { params: { id: string } }) {
 
     return () => clearInterval(interval);
   }, [mutate]);
+
+  useEffect(() => {
+    if (data?.lastLog?.serial_tx) {
+      setSerialTx(base64Encode(data.lastLog.serial_tx));
+    }
+  }, [data]);
+
+  const handleBlur = async () => {
+    if (!serialTx.trim()) return;
+
+    await updateDeviceTrigger({
+      device_id: params.id,
+      serial_tx: base64Encode(serialTx),
+    });
+
+    await mutate();
+  };
 
   if (!data) {
     return <Loading />;
@@ -144,10 +165,17 @@ export default function Page({ params }: { params: { id: string } }) {
             <CardHeader>
               <CardTitle>最新消息</CardTitle>
               <Row label="接收数据">
-                {base64Encoded(data?.lastLog?.serial_tx)}
+                {base64Decode(data?.lastLog?.serial_rx)}
               </Row>
               <Row label="发送数据">
-                {base64Encoded(data?.lastLog?.serial_rx)}
+                <input
+                    className="w-full p-2 border rounded"
+                    type="text"
+                    placeholder="输入数据"
+                    value={serialTx}
+                    onChange={(e) => setSerialTx(e.target.value)}
+                    onBlur={handleBlur}
+                />
               </Row>
             </CardHeader>
           </Card>

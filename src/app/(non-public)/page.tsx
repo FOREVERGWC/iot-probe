@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import UserDeviceFormDialog from "@/app/(non-public)/device/modules/UserDeviceFormDialog";
 import EmptyState from "@/components/ui/empty";
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
+import { Edit, Plus, Trash } from "lucide-react";
 
 export default function Home() {
     const { data, mutate } = api.devices.useSWR();
@@ -41,7 +42,12 @@ export default function Home() {
     return (
         <main className="min-h-screen p-12">
             <div className="mb-8">
-                <UserDeviceFormDialog triggerText="添加设备" onSuccess={mutate} />
+                <UserDeviceFormDialog onSuccess={mutate}>
+                    <Button variant="ghost">
+                        <Plus className="h-4 w-4" />
+                        <span className="ml-2">添加设备</span>
+                    </Button>
+                </UserDeviceFormDialog>
             </div>
 
             {data.length === 0 ? (
@@ -92,9 +98,15 @@ export default function Home() {
                                 </CardContent>
                             </Link>
                             <div className="flex justify-between p-4">
-                                <UserDeviceFormDialog deviceId={device.device_id} triggerText="编辑" onSuccess={mutate} />
+                                <UserDeviceFormDialog deviceId={device.device_id} onSuccess={mutate}>
+                                    <Button variant="ghost">
+                                        <Edit className="h-4 w-4" />
+                                        <span className="ml-2">编辑</span>
+                                    </Button>
+                                </UserDeviceFormDialog>
                                 <Button variant="destructive" onClick={() => handleDelete(device.device_id)}>
-                                    删除
+                                    <Trash className="h-4 w-4" />
+                                    <span className="ml-2">删除</span>
                                 </Button>
                             </div>
                         </Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,13 @@ import { useToast } from "@/components/ui/use-toast";
 
 type DeviceFormDialogProps = {
     deviceId?: string;
-    triggerText: string;
+    children: ReactNode;
     onSuccess?: () => void;
 };
 
-export default function UserDeviceFormDialog({ deviceId, triggerText, onSuccess }: DeviceFormDialogProps) {
-    const { state } = useAuth(); // 从上下文获取用户状态和 token
-    const { toast } = useToast(); // 获取 toast 函数
+export default function UserDeviceFormDialog({ deviceId, onSuccess, children }: DeviceFormDialogProps) {
+    const { state } = useAuth();
+    const { toast } = useToast();
     const [deviceData, setDeviceData] = useState({
         device_id: deviceId || "",
         alias_name: "",
@@ -81,7 +81,7 @@ export default function UserDeviceFormDialog({ deviceId, triggerText, onSuccess 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost">{triggerText}</Button>
+                {children}
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>

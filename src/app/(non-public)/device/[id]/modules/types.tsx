@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { RouterOutput } from "@/utils/trpc";
-import {base64Encoded, formattedDate} from "@/utils/time";
+import {base64Decode, formattedDate} from "@/utils/time";
 import {Button} from "@/components/ui/button";
 
 export type ChangeLog = RouterOutput["deviceChangeLog"][number];
@@ -102,7 +102,7 @@ export const columns4: ColumnDef<ChangeLog>[] = [
         accessorKey: "serial_rx",
         header: "发送数据",
         cell: ({ row }) => {
-            return <p>{base64Encoded(row.getValue("serial_rx"))}</p>;
+            return <p>{base64Decode(row.getValue("serial_rx"))}</p>;
         }
     },
     {
@@ -129,7 +129,7 @@ export const columns5: ColumnDef<ChangeLog>[] = [
         accessorKey: "serial_tx",
         header: "接收数据",
         cell: ({ row }) => {
-            return <p>{base64Encoded(row.getValue("serial_tx"))}</p>;
+            return <p>{base64Decode(row.getValue("serial_tx"))}</p>;
         },
     },
     {
