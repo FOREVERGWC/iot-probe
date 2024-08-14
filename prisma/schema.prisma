@@ -17,7 +17,8 @@ model device {
   is_online            Boolean
   serial_tx            String  @db.VarChar(200)
   alias_name           String  @db.VarChar(20)
-  user_devices         user_device[]
+  user_id              Int?
+  user                 user?     @relation(fields: [user_id], references: [id])
 }
 
 model device_change_log {
@@ -69,14 +70,5 @@ model user {
   phone               String    @db.VarChar(20)
   level               Int
   remark              String    @db.VarChar(50)
-  user_devices        user_device[]
+  devices             device[]
 }
-
-model user_device {
-  id                  Int       @id @default(autoincrement())
-  user_id             Int
-  device_id           String    @db.VarChar(18)
-  user                user      @relation(fields: [user_id], references: [id])
-  device              device    @relation(fields: [device_id], references: [device_id])
-}
-

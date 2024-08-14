@@ -126,31 +126,38 @@ export const appRouter = router({
         .mutation(async ({ input }) => {
             // TODO 验证验证码并重置密码的逻辑
         }),
-  devices: procedure.query(async () => {
-    const devices = await prisma.device.findMany();
-    if (devices.length === 0) {
-      return [];
-    }
-    const deviceLogIds = devices.map((item: any) => item.latest_device_log_id);
-    const deviceLogs = await prisma.device_log.findMany({
-      where: {
-        id: {
-          in: deviceLogIds,
-        },
-      }
-    });
-    const latestLogsMap = new Map<string, typeof deviceLogs[0]>();
-    for (const log of deviceLogs) {
-      if (log.device_id && !latestLogsMap.has(log.device_id)) {
-        latestLogsMap.set(log.device_id, log);
-      }
-    }
+    devices: procedure.query(async ({ ctx }) => {
+        const userId = ctx.id;
 
-    return devices.map((device: any) => ({
-      ...device,
-      device_log: latestLogsMap.get(device.device_id) || null,
-    }));
-  }),
+        const devices = await prisma.device.findMany({
+            where: { user_id: userId }, // 根据用户ID查询
+        });
+
+        if (devices.length === 0) {
+            return [];
+        }
+
+        const deviceLogIds = devices.map((item: any) => item.latest_device_log_id);
+        const deviceLogs = await prisma.device_log.findMany({
+            where: {
+                id: {
+                    in: deviceLogIds,
+                },
+            },
+        });
+
+        const latestLogsMap = new Map<string, typeof deviceLogs[0]>();
+        for (const log of deviceLogs) {
+            if (log.device_id && !latestLogsMap.has(log.device_id)) {
+                latestLogsMap.set(log.device_id, log);
+            }
+        }
+
+        return devices.map((device: any) => ({
+            ...device,
+            device_log: latestLogsMap.get(device.device_id) || null,
+        }));
+    }),
   device: procedure
     .input(
       z.object({
@@ -207,6 +214,44 @@ export const appRouter = router({
             }
         });
       }),
+    updateDeviceAlias: procedure
+        .input(
+            z.object({
+                device_id: z.string().max(18),
+                alias_name: z.string().max(20),
+            })
+        )
+        .mutation(async ({ input, ctx}) => {
+            const { device_id, alias_name } = input;
+            const userId = ctx.id;
+
+            // 查找设备，确保它没有关联的用户或用户是自己
+            const device = await prisma.device.findUnique({
+                where: { device_id },
+            });
+
+            if (!device) {
+                throw new Error("设备未找到");
+            }
+
+            if (device.user_id && device.user_id !== userId) {
+                throw new Error("您没有权限更新此设备");
+            }
+
+            // 更新设备的 alias_name 并关联用户
+            const updatedDevice = await prisma.device.update({
+                where: { device_id },
+                data: {
+                    alias_name,
+                    user_id: userId, // 关联当前用户
+                },
+            });
+
+            return {
+                msg: "设备别名更新成功",
+                device: updatedDevice,
+            };
+        }),
   updateDevice: procedure
       .input(
           z.object({

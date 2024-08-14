@@ -6,7 +6,6 @@ import { ArrowLeft } from "lucide-react";
 
 const Back: React.FC = () => {
     const router = useRouter();
-    // TODO 有问题，会报错
     return (
         <Button
             variant="ghost"

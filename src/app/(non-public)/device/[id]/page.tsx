@@ -3,14 +3,6 @@
 import { useEffect } from "react";
 import { api } from "@/utils/trpc";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -32,29 +24,9 @@ import {
   columns5,
 } from "@/app/(non-public)/device/[id]/modules/types";
 import DataTable from "@/app/(non-public)/device/[id]/modules/DataTable";
-
-const Row: React.FC<{
-  label: string;
-  children: React.ReactNode;
-}> = ({ label, children }) => {
-  return (
-      <div className="flex flex-row justify-between">
-        <span className="pr-2 font-medium">{label}</span>
-        <span>{children}</span>
-      </div>
-  );
-};
-
-const MsSpeed = ({ speed }: { speed: string }) => (
-    <>
-      {speed}
-      {parseInt(speed?.slice(0, -2)) > 9000 && (
-          <Badge variant="destructive" className="mx-2">
-            离线
-          </Badge>
-      )}
-    </>
-);
+import IntranetStatusCard from "@/app/(non-public)/device/[id]/modules/IntranetStatusCard";
+import ExtranetStatusCard from "@/app/(non-public)/device/[id]/modules/ExtranetStatusCard";
+import Row from "@/app/(non-public)/device/[id]/modules/Row";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
@@ -180,67 +152,19 @@ export default function Page({ params }: { params: { id: string } }) {
             </CardHeader>
           </Card>
           <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="row-span-2">
-              <CardHeader>
-                <CardTitle>内网状态</CardTitle>
-                <CardDescription>内网探针记录</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>IP地址</TableHead>
-                      <TableHead>延迟</TableHead>
-                      <TableHead>延迟（打包）</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {data.lastLog?.intranet_ping_array &&
-                        (
-                            JSON.parse(
-                                data.lastLog?.intranet_ping_array
-                            ) as unknown as {
-                              intranetIP: string;
-                              speed: string;
-                              speedLarge: string;
-                            }[]
-                        ).map((ping, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">
-                                {ping.intranetIP}
-                              </TableCell>
-                              <TableCell>
-                                <MsSpeed speed={ping.speed}/>
-                              </TableCell>
-                              <TableCell>
-                                <MsSpeed speed={ping.speedLarge}/>
-                              </TableCell>
-                            </TableRow>
-                        ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-              <CardFooter>
-                <Button>添加内针探针</Button>
-              </CardFooter>
-            </Card>
-            <Card className="row-span-2">
-              <CardHeader>
-                <CardTitle>外网状态</CardTitle>
-                <CardDescription>外网探针记录</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Row label="外网 Ping">
-                  <MsSpeed speed={data.lastLog?.extranet_ping!}/>
-                </Row>
-                <Row label="外网 Ping Large">
-                  <MsSpeed speed={data.lastLog?.extranet_ping_large!}/>
-                </Row>
-              </CardContent>
-              <CardFooter>
-                <Button>添加外网探针</Button>
-              </CardFooter>
-            </Card>
+            <IntranetStatusCard
+                deviceId={params.id}
+                intranetArray={data?.device?.intranet_array}
+                intranetPingArray={data.lastLog?.intranet_ping_array}
+                onSuccess={mutate}
+            />
+            <ExtranetStatusCard
+                deviceId={params.id}
+                extranetArray={data?.device?.extranet_array}
+                extranetPing={data.lastLog?.extranet_ping!}
+                extranetPingLarge={data.lastLog?.extranet_ping_large!}
+                onSuccess={mutate}
+            />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <RecordChangeTable

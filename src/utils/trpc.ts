@@ -6,15 +6,15 @@ import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
-    // browser should use relative path
+      // browser should use relative path
     return "";
 
   if (process.env.VERCEL_URL)
-    // reference for vercel.com
+      // reference for vercel.com
     return `https://${process.env.VERCEL_URL}`;
 
   if (process.env.RENDER_INTERNAL_HOSTNAME)
-    // reference for render.com
+      // reference for render.com
     return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`;
 
   // assume localhost
@@ -27,8 +27,17 @@ export const api = createSWRProxyHooks<AppRouter>({
   links: [
     httpBatchLink({
       url: `${getBaseUrl()}/api/trpc`,
+      headers: () => {
+        if (typeof window !== "undefined") {
+          const token = localStorage.getItem("token");
+          return {
+            Authorization: token ? `Bearer ${token}` : undefined,
+          };
+        }
+        return {};
+      },
     }),
-  ], // @ts-ignore
+  ],
   // transformer: SuperJSON,
 });
 

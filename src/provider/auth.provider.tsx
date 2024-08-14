@@ -1,28 +1,24 @@
 "use client";
 
-import React, { createContext, useReducer, useContext, useEffect, ReactNode } from "react";
+import React, {createContext, useReducer, useContext, useEffect, ReactNode, useState} from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-// 定义 Auth 状态类型
 interface AuthState {
   id: number | null;
   username: string | null;
   token: string | null;
 }
 
-// 定义 Action 类型
 type AuthAction =
     | { type: "LOGIN"; payload: { id: number; username: string; token: string } }
     | { type: "LOGOUT" };
 
-// 初始状态
 const initialAuthState: AuthState = {
   id: null,
   username: null,
   token: null,
 };
 
-// 创建 AuthContext
 const AuthContext = createContext<{
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
@@ -31,7 +27,6 @@ const AuthContext = createContext<{
   dispatch: () => null,
 });
 
-// 创建 reducer 函数
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case "LOGIN":
@@ -53,13 +48,13 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
   }
 }
 
-// 合并后的 AuthProvider 组件
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
   const router = useRouter();
   const pathname = usePathname();
 
-  // 从 localStorage 恢复状态
+  const [isAuthInitialized, setAuthInitialized] = useState(false);
+
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedId = localStorage.getItem("id");
@@ -75,9 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
     }
+    setAuthInitialized(true);
   }, []);
 
-  // 状态变化时同步到 localStorage
   useEffect(() => {
     if (state.token) {
       localStorage.setItem("token", state.token);
@@ -90,18 +85,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [state.token, state.id, state.username]);
 
-  // 路由保护逻辑
   useEffect(() => {
+    if (!isAuthInitialized) return; // 确保状态已初始化再执行路由逻辑
+
     const isLoggedIn = state.token !== null;
 
     if (!isLoggedIn && pathname !== "/login" && pathname !== "/register" && pathname !== "/forgot-password") {
       router.push("/login");
-    }
-
-    if (isLoggedIn && (pathname === "/login" || pathname === "/register")) {
+    } else if (isLoggedIn && (pathname === "/login" || pathname === "/register")) {
       router.push("/");
     }
-  }, [router, pathname, state.token]);
+  }, [router, pathname, state.token, isAuthInitialized]);
 
   return (
       <AuthContext.Provider value={{ state, dispatch }}>
@@ -110,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// 自定义 Hook 用于访问 AuthContext
 export function useAuth() {
   return useContext(AuthContext);
 }
