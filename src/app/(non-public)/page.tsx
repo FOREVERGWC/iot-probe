@@ -18,6 +18,7 @@ import EmptyState from "@/components/ui/empty";
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
 import { Edit, Plus, Trash } from "lucide-react";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
+import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
 
 export default function Home() {
     const { data, mutate } = api.devices.useSWR();
@@ -66,11 +67,7 @@ export default function Home() {
                                 </CardHeader>
                                 <CardContent className="space-y-2">
                                     <Row label="状态">
-                                        <Badge
-                                            className={device.is_online ? "bg-green-500" : "bg-red-500"}
-                                        >
-                                            {device.is_online ? "在线" : "离线"}
-                                        </Badge>
+                                        <OnlineStatus isOnline={device.is_online} />
                                     </Row>
                                     <Row label="电源状态">
                                         <PowerStatus

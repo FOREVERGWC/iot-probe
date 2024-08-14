@@ -29,6 +29,7 @@ import IntranetStatusCard from "@/app/(non-public)/device/[id]/modules/IntranetS
 import ExtranetStatusCard from "@/app/(non-public)/device/[id]/modules/ExtranetStatusCard";
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
+import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
@@ -78,13 +79,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </CardHeader>
             <CardContent className="space-y-2">
               <Row label="状态">
-                <Badge
-                    className={
-                      data?.device?.is_online ? "bg-green-500" : "bg-red-500"
-                    }
-                >
-                  {data?.device?.is_online ? "在线" : "离线"}
-                </Badge>
+                <OnlineStatus isOnline={data?.device?.is_online} />
               </Row>
               <Row label="电源状态">
                 <PowerStatus
