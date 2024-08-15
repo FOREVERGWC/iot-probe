@@ -31,10 +31,12 @@ import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
 import EthernetStatus from "@/app/(non-public)/device/modules/EthernetStatus";
 import LongText from "@/app/(non-public)/device/modules/LongText";
 import Supplier from "@/app/(non-public)/device/[id]/modules/Supplier";
+import { saveAs } from "file-saver";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
   const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation();
+  const { trigger: downloadDeviceLogs } = api.downloadDeviceLogs.useSWRMutation();
 
   const [serialTx, setSerialTx] = useState("");
   const historyRef = useRef<HTMLDivElement>(null);
@@ -62,6 +64,13 @@ export default function Page({ params }: { params: { id: string } }) {
     });
 
     await mutate();
+  };
+
+  const handleDownload = async () => {
+    const version = data?.lastLog?.firmware_version || "";
+    const csvData = await downloadDeviceLogs({ device_id: params.id, version });
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, `${params.id}_device.csv`);
   };
 
   const scrollToHistory = () => {
@@ -99,7 +108,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button onClick={scrollToHistory}>查看历史日志</Button>
-              <Button variant="outline" onClick={scrollToHistory}>下载数据</Button>
+              <Button variant="outline" onClick={handleDownload}>下载数据</Button>
             </CardFooter>
           </Card>
           <Card className="col-span-1">

@@ -1,8 +1,10 @@
-import {z} from "zod";
+import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {procedure, router} from "./trpc";
+import { procedure, router } from "./trpc";
 import prisma from "@/libs/db";
+import { Parser } from "json2csv";
+import { base64Decode } from "@/utils/time";
 // import { diff } from "json-diff-ts";
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
@@ -328,6 +330,44 @@ export const appRouter = router({
         },
       });
     }),
+    downloadDeviceLogs: procedure
+        .input(
+            z.object({
+                device_id: z.string(),
+                version: z.string(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            const { device_id, version } = input;
+
+            let maxRecords = 1440;
+            if (version.includes("PRO")) {
+                maxRecords = 10000;
+            }
+
+            const [deviceLogs, changeLogs] = await Promise.all([
+                prisma.device_log.findMany({
+                    where: { device_id },
+                    take: maxRecords,
+                    orderBy: { update_time: "desc" },
+                }),
+                prisma.device_change_log.findMany({
+                    where: { device_id },
+                    take: maxRecords,
+                    orderBy: { update_time: "desc" },
+                }),
+            ]);
+
+            const processedDeviceLogs = deviceLogs.map(log => ({
+                ...log,
+                serial_rx: log.serial_rx ? base64Decode(log.serial_rx) : log.serial_rx,
+                serial_tx: log.serial_tx ? base64Decode(log.serial_tx) : log.serial_tx,
+            }));
+
+            const json2csvParser = new Parser();
+            const res = json2csvParser.parse([...processedDeviceLogs, ...changeLogs]);
+            return `\ufeff${res}`;
+        }),
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
