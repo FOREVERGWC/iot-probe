@@ -25,8 +25,8 @@ import {
 import { api } from "@/utils/trpc";
 import { cn } from "@/libs/utils";
 import Loading from "@/app/loading";
-import {CardHeader, CardTitle} from "@/components/ui/card";
-import {ChangeLog} from "@/app/(non-public)/device/[id]/modules/types";
+import { CardHeader, CardTitle } from "@/components/ui/card";
+import { ChangeLog } from "@/app/(non-public)/device/[id]/modules/types";
 
 const DataTable: React.FC<{
     title?: string;
@@ -36,7 +36,7 @@ const DataTable: React.FC<{
 }> = ({ title, device_id, className, columns }) => {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        [],
+        []
     );
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({});
@@ -44,7 +44,6 @@ const DataTable: React.FC<{
 
     const { data, isLoading } = api.deviceLogs.useSWR({ device_id });
 
-    // @ts-ignore
     const table = useReactTable({
         // @ts-ignore
         data: data!,
@@ -77,48 +76,56 @@ const DataTable: React.FC<{
                     <CardTitle>{title}</CardTitle>
                 </CardHeader>
             )}
-            <Table>
-                <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-                                return (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext(),
-                                            )}
-                                    </TableHead>
-                                );
-                            })}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                            <TableRow
-                                key={row.id}
-                                data-state={row.getIsSelected() && "selected"}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id}>
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </TableCell>
-                                ))}
+            <div className="max-h-[240px] overflow-y-auto">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => {
+                                    return (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    );
+                                })}
                             </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center">
-                                No results.
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    暂无数据
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 };

@@ -28,6 +28,9 @@ import ExtranetStatusCard from "@/app/(non-public)/device/[id]/modules/ExtranetS
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
+import EthernetStatus from "@/app/(non-public)/device/modules/EthernetStatus";
+import LongText from "@/app/(non-public)/device/modules/LongText";
+import Supplier from "@/app/(non-public)/device/[id]/modules/Supplier";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
@@ -94,8 +97,9 @@ export default function Page({ params }: { params: { id: string } }) {
               <Row label="最后日志 ID">{data?.device?.latest_device_log_id}</Row>
               <Row label="最后上线于">{formattedDate(data.lastLog?.update_time)}</Row>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex justify-between">
               <Button onClick={scrollToHistory}>查看历史日志</Button>
+              <Button variant="outline" onClick={scrollToHistory}>下载数据</Button>
             </CardFooter>
           </Card>
           <Card className="col-span-1">
@@ -104,11 +108,7 @@ export default function Page({ params }: { params: { id: string } }) {
               <Row label="设备 IP">{data?.device?.intranet_array.split(",")[0]}</Row>
               <Row label="网关 IP">{data?.device?.intranet_array.split(",")[1]}</Row>
               <Row label="以太网状态">
-                {data.lastChangeLog?.ethernet === -1
-                    ? "正常"
-                    : data.lastChangeLog?.ethernet
-                        ? "异常"
-                        : "未知"}
+                <EthernetStatus ethernet={data?.lastChangeLog?.ethernet} />
               </Row>
             </CardHeader>
           </Card>
@@ -124,12 +124,17 @@ export default function Page({ params }: { params: { id: string } }) {
             <CardHeader>
               <CardTitle>SIM 卡状态</CardTitle>
               <Row label="ICCID">{data.lastLog?.iccid}</Row>
+              <Row label="供应商">
+                <Supplier iccid={data?.lastLog?.iccid} />
+              </Row>
             </CardHeader>
           </Card>
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>最新消息</CardTitle>
-              <Row label="接收数据">{base64Decode(data?.lastLog?.serial_rx)}</Row>
+              <Row label="接收数据">
+                <LongText text={base64Decode(data?.lastLog?.serial_rx || '')}/>
+              </Row>
               <Row label="发送数据">
                 <input
                     className="w-full p-2 border rounded"
@@ -157,14 +162,15 @@ export default function Page({ params }: { params: { id: string } }) {
                 onSuccess={mutate}
             />
           </div>
+          {/* TODO 父组件查询日志传递给子组件，防止重复查询 */}
           <div ref={historyRef} className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <RecordChangeTable title="设备状态" device_id={params.id} columns={columns} />
             <RecordChangeTable title="电源状态" device_id={params.id} columns={columns2} />
             <RecordChangeTable title="以太网状态" device_id={params.id} columns={columns3} />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DataTable title="接收数据" device_id={params.id} columns={columns5} />
-            <DataTable title="发送数据" device_id={params.id} columns={columns4} />
+            <DataTable title="探针接收数据" device_id={params.id} columns={columns4} />
+            <DataTable title="探针发送数据" device_id={params.id} columns={columns5} />
           </div>
         </div>
       </div>

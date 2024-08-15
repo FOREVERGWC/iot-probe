@@ -5,9 +5,9 @@ const Row: React.FC<{
     children: React.ReactNode;
 }> = ({ label, children }) => {
     return (
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between items-center">
             <span className="pr-2 font-medium">{label}</span>
-            <span>{children}</span>
+            <div className="flex-1 text-right max-w-full overflow-x-auto">{children}</div>
         </div>
     );
 };

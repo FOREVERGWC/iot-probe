@@ -1,7 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { RouterOutput } from "@/utils/trpc";
-import {base64Decode, formattedDate} from "@/utils/time";
-import {Button} from "@/components/ui/button";
+import { base64Decode, formattedDate } from "@/utils/time";
+import EthernetStatus from "@/app/(non-public)/device/modules/EthernetStatus";
+import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
+import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
+import React from "react";
 
 export type ChangeLog = RouterOutput["deviceChangeLog"][number];
 
@@ -21,16 +24,9 @@ export const columns: ColumnDef<ChangeLog>[] = [
         header: "状态",
         cell: ({ row }) => {
             const value = row.getValue("online");
-            return <p>{value === -1 ? "上线" : (value ? "离线" : "异常")}</p>;
+            return <OnlineStatus isOnline={value === -1} isError={value === 0} />
         },
-    },
-    {
-        id: "日志",
-        enableHiding: false,
-        cell: ({ row }) => {
-            return <Button>查看</Button>;
-        },
-    },
+    }
 ];
 
 /**
@@ -48,16 +44,10 @@ export const columns2: ColumnDef<ChangeLog>[] = [
         accessorKey: "electric",
         header: "状态",
         cell: ({ row }) => {
-            return <p>{row.getValue("electric") === -1 ? "正常" : "异常"}</p>;
+            const electric = row.getValue("electric") as number
+            return <PowerStatus isOnline={true} electric={electric} />
         },
-    },
-    {
-        id: "日志",
-        enableHiding: false,
-        cell: ({ row }) => {
-            return <Button>查看</Button>;
-        },
-    },
+    }
 ];
 
 /**
@@ -75,20 +65,14 @@ export const columns3: ColumnDef<ChangeLog>[] = [
         accessorKey: "ethernet",
         header: "状态",
         cell: ({ row }) => {
-            return <p>{row.getValue("ethernet") === -1 ? "正常" : (row.getValue("ethernet") ? "异常" : "未知")}</p>;
+            const ethernet = row.getValue("ethernet") as number || null
+            return <EthernetStatus ethernet={ethernet} />;
         },
-    },
-    {
-        id: "日志",
-        enableHiding: false,
-        cell: ({ row }) => {
-            return <Button>查看</Button>;
-        },
-    },
+    }
 ];
 
 /**
- * 发送数据
+ * 探针发送数据
  */
 export const columns4: ColumnDef<ChangeLog>[] = [
     {
@@ -102,20 +86,13 @@ export const columns4: ColumnDef<ChangeLog>[] = [
         accessorKey: "serial_rx",
         header: "发送数据",
         cell: ({ row }) => {
-            return <p>{base64Decode(row.getValue("serial_rx"))}</p>;
+            return <p>{base64Decode(row.getValue("serial_rx") || '')}</p>;
         }
-    },
-    {
-        id: "日志",
-        enableHiding: false,
-        cell: ({ row }) => {
-            return <Button>查看</Button>;
-        },
-    },
+    }
 ];
 
 /**
- * 接收数据
+ * 探针接收数据
  */
 export const columns5: ColumnDef<ChangeLog>[] = [
     {
@@ -129,14 +106,7 @@ export const columns5: ColumnDef<ChangeLog>[] = [
         accessorKey: "serial_tx",
         header: "接收数据",
         cell: ({ row }) => {
-            return <p>{base64Decode(row.getValue("serial_tx"))}</p>;
+            return <p>{base64Decode(row.getValue("serial_tx") || '')}</p>;
         },
-    },
-    {
-        id: "日志",
-        enableHiding: false,
-        cell: ({ row }) => {
-            return <Button>查看</Button>;
-        },
-    },
+    }
 ];

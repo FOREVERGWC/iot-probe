@@ -3,15 +3,15 @@ import { Badge } from "@/components/ui/badge";
 
 interface PowerStatusProps {
     isOnline: boolean;
-    electric: string | undefined | null;
+    electric: string | number | undefined | null;
 }
 
 const PowerStatus: React.FC<PowerStatusProps> = ({ isOnline, electric }) => {
-    let badgeColor = "bg-gray-500";
+    let badgeColor = "bg-yellow-500";
     let badgeText = "未知";
 
     if (isOnline) {
-        if (electric === "correct") {
+        if (electric === "correct" || electric === -1) {
             badgeColor = "bg-green-500";
             badgeText = "正常";
         } else {

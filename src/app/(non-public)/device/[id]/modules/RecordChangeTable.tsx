@@ -113,7 +113,7 @@ const RecordChangeTable: React.FC<{
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                暂无数据
               </TableCell>
             </TableRow>
           )}
