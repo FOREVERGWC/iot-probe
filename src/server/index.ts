@@ -1,3 +1,4 @@
+import { Client } from "tencentcloud-sdk-nodejs/tencentcloud/services/sms/v20210111/sms_client";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -8,6 +9,23 @@ import { base64Decode } from "@/utils/time";
 // import { diff } from "json-diff-ts";
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
+const SECRET_Id = process.env.TENCENTCLOUD_SECRET_ID || '';
+const SECRET_Key = process.env.TENCENTCLOUD_SECRET_KEY || '';
+
+const clientConfig = {
+    credential: {
+        secretId: SECRET_Id,
+        secretKey: SECRET_Key,
+    },
+    region: "ap-nanjing",
+    profile: {
+        httpProfile: {
+            endpoint: "sms.tencentcloudapi.com",
+        },
+    },
+};
+
+const client = new Client(clientConfig);
 
 export const appRouter = router({
     register: procedure
@@ -23,10 +41,11 @@ export const appRouter = router({
                         { message: "无效的电话号码格式" }
                     ),
                 remark: z.string().max(50).optional(),
+                code: z.string().min(1)
             }),
         )
         .mutation(async ({ input }) => {
-            const { username, password, phone, remark } = input;
+            const { username, password, phone, remark, code } = input;
 
             const existingUserByUsername = await prisma.user.findFirst({
                 where: { username },
@@ -39,6 +58,22 @@ export const appRouter = router({
             });
             if (existingUserByPhone) {
                 throw new Error("注册失败！该手机号已注册");
+            }
+            // 查询验证码
+            const verificationCode = await prisma.code.findFirst({
+                where: {
+                    phone,
+                    expires_at: {
+                        gt: new Date(), // 确保验证码未过期
+                    },
+                },
+                orderBy: {
+                    expires_at: 'desc',
+                },
+            });
+
+            if (!verificationCode || verificationCode.code !== code) {
+                throw new Error("验证码无效或已过期，请重新获取验证码。");
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
@@ -99,17 +134,59 @@ export const appRouter = router({
     sendVerificationCode: procedure
         .input(
             z.object({
-                phone: z
-                    .string()
-                    .max(20)
-                    .regex(
-                        /^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
-                        { message: "无效的电话号码格式" }
-                    ),
+                phone: z.string().max(20).regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, { message: "无效的电话号码格式" }),
             })
         )
         .mutation(async ({ input }) => {
-            // TODO 发送验证码的逻辑
+            const { phone } = input;
+
+            // 检查是否在两分钟内已经发送过验证码
+            const existingCode = await prisma.code.findFirst({
+                where: {
+                    phone,
+                    expires_at: {
+                        gt: new Date(), // 找到未过期的验证码
+                    },
+                },
+                orderBy: {
+                    expires_at: 'desc',
+                },
+            });
+
+            if (existingCode) {
+                throw new Error("验证码已发送，请稍后再试。");
+            }
+
+            // 生成随机的四位验证码
+            const code = Math.floor(1000 + Math.random() * 9000).toString();
+
+            const params = {
+                "PhoneNumberSet": [phone],
+                "SmsSdkAppId": '1400931056',
+                "TemplateId": '2242917',
+                "SignName": '徐州九溪云商贸',
+                "TemplateParamSet": [code, '2'], // '2' 是验证码的有效期分钟数
+            } as any;
+
+            try {
+                const data = await client.SendSms(params);
+                console.log('请求成功！', data);
+
+                await prisma.code.create({
+                    data: {
+                        phone: phone,
+                        code: code,
+                        expires_at: new Date(Date.now() + 2 * 60 * 1000), // 验证码有效期为2分钟
+                    },
+                });
+
+                return {
+                    msg: "验证码发送成功",
+                };
+            } catch (err) {
+                console.error("发送验证码失败", err);
+                throw new Error("验证码发送失败，请重试。");
+            }
         }),
     resetPassword: procedure
         .input(
@@ -121,12 +198,47 @@ export const appRouter = router({
                         /^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/,
                         { message: "无效的电话号码格式" }
                     ),
-                verificationCode: z.string().min(6),
+                verificationCode: z.string().min(4),
                 newPassword: z.string().min(1, { message: "密码不能为空" }).max(80)
             })
         )
         .mutation(async ({ input }) => {
-            // TODO 验证验证码并重置密码的逻辑
+            const { phone, verificationCode, newPassword } = input;
+
+            // 查询验证码
+            const verificationRecord = await prisma.code.findFirst({
+                where: {
+                    phone,
+                    expires_at: {
+                        gt: new Date(), // 确保验证码未过期
+                    },
+                },
+                orderBy: {
+                    expires_at: 'desc',
+                },
+            });
+
+            // 验证验证码是否有效
+            if (!verificationRecord || verificationRecord.code !== verificationCode) {
+                throw new Error("验证码无效或已过期，请重新获取验证码。");
+            }
+
+            // 如果验证码有效，则加密新密码
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            // 更新用户密码
+            const updatedUser = await prisma.user.updateMany({
+                where: { phone },
+                data: { password: hashedPassword },
+            });
+
+            if (updatedUser.count === 0) {
+                throw new Error("重置密码失败，用户不存在。");
+            }
+
+            return {
+                msg: "密码重置成功！",
+            };
         }),
     devices: procedure.query(async ({ ctx }) => {
         const userId = ctx.id;

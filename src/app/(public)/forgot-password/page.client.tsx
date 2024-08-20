@@ -23,7 +23,7 @@ export const forgotPasswordSchema = z.object({
         .regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, {
             message: "无效的电话号码格式",
         }),
-    verificationCode: z.string().min(6, { message: "验证码至少需要 6 个字符" }),
+    verificationCode: z.string().min(4, { message: "验证码至少需要 4 个字符" }),
     newPassword: z.string().min(6, { message: "新密码至少需要 6 个字符" }).max(80)
 });
 

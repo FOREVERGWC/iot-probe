@@ -72,3 +72,10 @@ model user {
   remark              String    @db.VarChar(50)
   devices             device[]
 }
+
+model code {
+  id                  Int       @id @default(autoincrement())
+  phone               String    @db.VarChar(20)
+  code                String    @db.VarChar(4)
+  expires_at          DateTime  @db.DateTime(0)
+}

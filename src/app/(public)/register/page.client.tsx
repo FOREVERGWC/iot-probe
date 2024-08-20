@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/trpc";
-import { useToast } from "@/components/ui/use-toast"; // 引入 Toast 的 hook
+import { useToast } from "@/components/ui/use-toast";
 
 export const registerSchema = z.object({
     username: z.string().min(1, { message: "用户名不能为空" }),
@@ -26,11 +26,13 @@ export const registerSchema = z.object({
         .regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, {
             message: "无效的电话号码格式",
         }),
+    code: z.string().min(4, { message: "验证码至少需要 4 个字符" }),
 });
 
 function RegisterForm() {
     const router = useRouter();
     const { trigger: registerTrigger } = api.register.useSWRMutation();
+    const { trigger: sendVerificationTrigger } = api.sendVerificationCode.useSWRMutation();
     const { toast } = useToast();  // 使用 Toast 的 hook
 
     const form = useForm<z.infer<typeof registerSchema>>({
@@ -38,7 +40,8 @@ function RegisterForm() {
         defaultValues: {
             username: '',
             password: '',
-            phone: ''
+            phone: '',
+            code: ''
         }
     });
 
@@ -61,14 +64,32 @@ function RegisterForm() {
                     variant: "destructive",
                 });
             }
-        } catch (error) {
-            console.error("注册失败:", error);
+        } catch (error: any) {
             toast({
                 title: "注册失败",
-                description: "注册失败，请重试。",
+                description: error?.message || "注册失败，请重试。",
                 variant: "destructive",
             });
         }
+    };
+
+    const handleSendCode = async () => {
+        const phoneValue = form.getValues("phone");
+        if (!phoneValue) {
+            toast({
+                title: "发送失败",
+                description: "请先输入有效的电话号码。",
+                variant: "destructive",
+            });
+            return
+        }
+        const result = await sendVerificationTrigger({phone: phoneValue});
+        console.log(result);
+        toast({
+            title: "验证码已发送",
+            description: "验证码已发送到您的手机，请注意查收。",
+            variant: "default",
+        });
     };
 
     return (
@@ -125,7 +146,33 @@ function RegisterForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <Input type="text" placeholder="手机" {...field} />
+                                <div className="flex space-x-2">
+                                    <Input
+                                        type="text"
+                                        placeholder="手机"
+                                        {...field}
+                                        className="flex-grow"
+                                    />
+                                    <Button
+                                        type="button"
+                                        onClick={handleSendCode}
+                                        className="flex-shrink-0"
+                                    >
+                                        发送验证码
+                                    </Button>
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                                <Input type="text" placeholder="验证码" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
