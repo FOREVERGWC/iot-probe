@@ -35,7 +35,7 @@ export default function Navbar() {
                 {/* 网站名称，左对齐 */}
                 <NavigationMenuItem>
           <span className="text-white text-lg font-bold">
-            电网探针
+            九溪云服务
           </span>
                 </NavigationMenuItem>
 

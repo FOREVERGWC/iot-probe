@@ -14,7 +14,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "电网探针",
+  title: "九溪云服务",
 };
 
 export default function RootLayout({
