@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { procedure, router } from "./trpc";
 import prisma from "@/libs/db";
 import { Parser } from "json2csv";
-import { base64Decode } from "@/utils/time";
+import {base64Decode, formattedDate} from "@/utils/time";
 // import { diff } from "json-diff-ts";
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
@@ -459,27 +459,28 @@ export const appRouter = router({
                 maxRecords = 10000;
             }
 
-            const [deviceLogs, changeLogs] = await Promise.all([
+            const [deviceLogs] = await Promise.all([
                 prisma.device_log.findMany({
-                    where: { device_id },
-                    take: maxRecords,
-                    orderBy: { update_time: "desc" },
-                }),
-                prisma.device_change_log.findMany({
                     where: { device_id },
                     take: maxRecords,
                     orderBy: { update_time: "desc" },
                 }),
             ]);
 
-            const processedDeviceLogs = deviceLogs.map(log => ({
-                ...log,
-                serial_rx: log.serial_rx ? base64Decode(log.serial_rx) : log.serial_rx,
-                serial_tx: log.serial_tx ? base64Decode(log.serial_tx) : log.serial_tx,
-            }));
+            const processedDeviceLogs = deviceLogs.map(log => {
+                const { iccid, ip, gateway, importance_level, ...rest } = log;
+                return {
+                    ...rest,
+                    serial_rx: base64Decode(log.serial_rx),
+                    serial_tx: base64Decode(log.serial_tx),
+                    update_time: formattedDate(log.update_time)
+                };
+            });
 
-            const json2csvParser = new Parser();
-            const res = json2csvParser.parse([...processedDeviceLogs, ...changeLogs]);
+            const json2csvParser = new Parser({
+                fields: Object.keys(processedDeviceLogs[0])
+            });
+            const res = json2csvParser.parse(processedDeviceLogs);
             return `\ufeff${res}`;
         }),
 });
