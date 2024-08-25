@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import EmptyState from "@/components/ui/empty";
 import { api } from "@/utils/trpc";
 import MsSpeed from "@/app/(non-public)/device/[id]/modules/MsSpeed";
+import { Trash } from "lucide-react";
 
 interface ExtranetStatusCardProps {
     deviceId: string;
@@ -43,6 +44,19 @@ export default function ExtranetStatusCard({
         const existingPing = pingData.find(ping => ping.extranetIP === ip);
         return existingPing || { extranetIP: ip, speed: "未知", speedLarge: "未知" };
     });
+
+    const handleDeleteIp = async (ipToDelete: string) => {
+        const updatedIps = existingIps.filter(ip => ip !== ipToDelete);
+
+        await updateDeviceTrigger({
+            device_id: deviceId,
+            extranet_array: updatedIps.join(","),
+        });
+
+        if (onSuccess) {
+            onSuccess();
+        }
+    };
 
     const handleAddUrl = async () => {
         if (!newUrl.trim() || existingIps.length >= 3) return;
@@ -87,20 +101,39 @@ export default function ExtranetStatusCard({
                         <TableHeader>
                             <TableRow>
                                 <TableHead>网址</TableHead>
-                                <TableHead>外网 Ping</TableHead>
-                                <TableHead>外网 Ping Large</TableHead>
+                                <TableHead className="text-center">外网 Ping</TableHead>
+                                <TableHead className="text-center">外网 Ping Large</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {completePingData.map((ping, index) => (
                                 <TableRow key={index}>
-                                    <TableCell className="font-medium">{ping.extranetIP}</TableCell>
-                                    <TableCell>
-                                        <MsSpeed speed={ping.speed!}/>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center justify-between">
+                                            <span>{ping.extranetIP}</span>
+                                            <Trash
+                                                className="cursor-pointer text-gray-500 hover:text-red-500 ml-2"
+                                                onClick={() => handleDeleteIp(ping.extranetIP)}
+                                                size={20}
+                                            />
+                                        </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <MsSpeed speed={ping.speedLarge!}/>
-                                    </TableCell>
+                                    {index === 0 && (
+                                        <>
+                                            <TableCell
+                                                rowSpan={existingIps.length}
+                                                className="text-center align-middle"
+                                            >
+                                                <MsSpeed speed={ping.speed!} />
+                                            </TableCell>
+                                            <TableCell
+                                                rowSpan={existingIps.length}
+                                                className="text-center align-middle"
+                                            >
+                                                <MsSpeed speed={ping.speedLarge!} />
+                                            </TableCell>
+                                        </>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -124,9 +157,7 @@ export default function ExtranetStatusCard({
                     </>
                 ) : (
                     existingIps.length < 3 && (
-                        <Button onClick={() => setShowInput(true)}>
-                            添加外网探针
-                        </Button>
+                        <Button onClick={() => setShowInput(true)}>添加外网探针</Button>
                     )
                 )}
             </CardFooter>
