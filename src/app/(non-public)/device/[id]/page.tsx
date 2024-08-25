@@ -37,6 +37,17 @@ export default function Page({ params }: { params: { id: string } }) {
   const { data, mutate } = api.device.useSWR({ id: params.id });
   const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation();
   const { trigger: downloadDeviceLogs } = api.downloadDeviceLogs.useSWRMutation();
+  const { data: onlineData, isLoading: isOnlineLoading } = api.deviceChangeLog.useSWR({
+    device_id: params.id,
+    filter: "online"
+  });
+  const { data: electricData, isLoading: isElectricLoading } = api.deviceChangeLog.useSWR({
+    device_id: params.id,
+    filter: "electric"
+  });
+  const { data: ethernetData, isLoading: isEthernetLoading } = api.deviceChangeLog.useSWR({
+    device_id: params.id
+  });
 
   const [serialTx, setSerialTx] = useState("");
   const historyRef = useRef<HTMLDivElement>(null);
@@ -173,9 +184,24 @@ export default function Page({ params }: { params: { id: string } }) {
           </div>
           {/* TODO 父组件查询日志传递给子组件，防止重复查询 */}
           <div ref={historyRef} className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <RecordChangeTable title="设备状态" device_id={params.id} columns={columns} />
-            <RecordChangeTable title="电源状态" device_id={params.id} columns={columns2} />
-            <RecordChangeTable title="以太网状态" device_id={params.id} columns={columns3} />
+            <RecordChangeTable
+                title="设备状态"
+                columns={columns}
+                data={onlineData as Array<any>}
+                isLoading={isOnlineLoading}
+            />
+            <RecordChangeTable
+                title="电源状态"
+                columns={columns2}
+                data={electricData as Array<any>}
+                isLoading={isElectricLoading}
+            />
+            <RecordChangeTable
+                title="以太网状态"
+                columns={columns3}
+                data={ethernetData as Array<any>}
+                isLoading={isEthernetLoading}
+            />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <DataTable title="接收数据记录" device_id={params.id} columns={columns4} />

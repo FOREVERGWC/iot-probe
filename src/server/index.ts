@@ -419,24 +419,24 @@ export const appRouter = router({
     .input(
       z.object({
         device_id: z.string(),
+        filter: z.string().optional()
       }),
     )
     .query(async ({ input }) => {
+        const filterCondition: any = {};
+        if (input.filter === "online") {
+            filterCondition.online = {
+                not: 0,
+            };
+        } else if (input.filter === "electric") {
+            filterCondition.electric = {
+                not: 0,
+            };
+        }
       return prisma.device_change_log.findMany({
         where: {
           device_id: input.device_id,
-            // AND: [
-            //     {
-            //         online: {
-            //             not: 0,
-            //         },
-            //     },
-            //     {
-            //         electric: {
-            //             not: 0,
-            //         },
-            //     },
-            // ],
+            ...filterCondition
         },
         take: 200,
         orderBy: {
