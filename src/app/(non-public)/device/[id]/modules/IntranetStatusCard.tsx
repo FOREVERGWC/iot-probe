@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import EmptyState from "@/components/ui/empty";
+import { Trash } from "lucide-react";
 import { api } from "@/utils/trpc";
 
 interface IntranetStatusCardProps {
@@ -66,6 +67,19 @@ export default function IntranetStatusCard({ deviceId, intranetArray, intranetPi
         }
     };
 
+    const handleDeleteIp = async (ipToDelete: string) => {
+        const updatedIps = existingIps.filter(ip => ip !== ipToDelete);
+
+        await updateDeviceTrigger({
+            device_id: deviceId,
+            intranet_array: updatedIps.join(","),
+        });
+
+        if (onSuccess) {
+            onSuccess();
+        }
+    };
+
     return (
         <Card className="row-span-2">
             <CardHeader>
@@ -85,7 +99,16 @@ export default function IntranetStatusCard({ deviceId, intranetArray, intranetPi
                         <TableBody>
                             {completePingData.map((ping, index) => (
                                 <TableRow key={index}>
-                                    <TableCell className="font-medium">{ping.intranetIP}</TableCell>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center justify-between">
+                                            <span>{ping.intranetIP}</span>
+                                            <Trash
+                                                className="cursor-pointer text-gray-500 hover:text-red-500 ml-2"
+                                                onClick={() => handleDeleteIp(ping.intranetIP)}
+                                                size={20}
+                                            />
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{ping.speed}</TableCell>
                                     <TableCell>{ping.speedLarge}</TableCell>
                                 </TableRow>
@@ -111,9 +134,7 @@ export default function IntranetStatusCard({ deviceId, intranetArray, intranetPi
                     </>
                 ) : (
                     existingIps.length < 3 && (
-                        <Button onClick={() => setShowInput(true)}>
-                            添加内网探针
-                        </Button>
+                        <Button onClick={() => setShowInput(true)}>添加内网探针</Button>
                     )
                 )}
             </CardFooter>
