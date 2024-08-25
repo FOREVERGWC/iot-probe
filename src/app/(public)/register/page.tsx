@@ -14,9 +14,9 @@ function LoginPage() {
         <div className="flex items-center justify-center min-h-screen">
             <Card className="mx-auto w-96 max-w-sm">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Register</CardTitle>
+                    <CardTitle className="text-2xl font-bold">注册</CardTitle>
                     <CardDescription className="text-center">
-                        Create an Account
+                        注册账号
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

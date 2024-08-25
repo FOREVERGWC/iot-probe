@@ -11,6 +11,9 @@ const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 const SECRET_Id = process.env.TENCENTCLOUD_SECRET_ID || '';
 const SECRET_Key = process.env.TENCENTCLOUD_SECRET_KEY || '';
+const SMS_SDK_APP_ID = process.env.SMS_SDK_APP_ID || '';
+const TEMPLATE_ID = process.env.TEMPLATE_ID || '';
+const SIGN_NAME = process.env.SIGN_NAME || '';
 
 const clientConfig = {
     credential: {
@@ -162,9 +165,9 @@ export const appRouter = router({
 
             const params = {
                 "PhoneNumberSet": [phone],
-                "SmsSdkAppId": '1400931056',
-                "TemplateId": '2242917',
-                "SignName": '徐州九溪云商贸',
+                "SmsSdkAppId": SMS_SDK_APP_ID,
+                "TemplateId": TEMPLATE_ID,
+                "SignName": SIGN_NAME,
                 "TemplateParamSet": [code, '2'], // '2' 是验证码的有效期分钟数
             } as any;
 
@@ -419,24 +422,23 @@ export const appRouter = router({
       }),
     )
     .query(async ({ input }) => {
-      // for (let log of logs) {
-      //   const before = await prisma.device_change_log.findUniqueOrThrow({
-      //     where: {
-      //       id: log.device_log_before,
-      //     },
-      //   });
-      //   const after = await prisma.device_change_log.findUniqueOrThrow({
-      //     where: {
-      //       id: log.device_log_after,
-      //     },
-      //   });
-      //   // log.diff = diff(log.old_data, log.new_data);
-      // }
       return prisma.device_change_log.findMany({
         where: {
           device_id: input.device_id,
+            // AND: [
+            //     {
+            //         online: {
+            //             not: 0,
+            //         },
+            //     },
+            //     {
+            //         electric: {
+            //             not: 0,
+            //         },
+            //     },
+            // ],
         },
-        take: 5,
+        take: 200,
         orderBy: {
           update_time: "desc",
         },

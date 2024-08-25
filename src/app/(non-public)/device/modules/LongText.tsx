@@ -31,7 +31,7 @@ const LongText: React.FC<{ text: string }> = ({ text }) => {
 
     return (
         <div className="relative max-w-full overflow-hidden">
-            <div ref={textRef} className="whitespace-nowrap">
+            <div ref={textRef} className="whitespace-nowrap pr-6">
                 <span className="block max-w-full">{text}</span>
             </div>
             <div className="absolute right-0 top-0 h-full flex items-center justify-center bg-white">

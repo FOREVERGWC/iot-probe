@@ -84,7 +84,7 @@ export const columns4: ColumnDef<ChangeLog>[] = [
     },
     {
         accessorKey: "serial_rx",
-        header: "发送数据",
+        header: "数据",
         cell: ({ row }) => {
             return <p>{base64Decode(row.getValue("serial_rx") || '')}</p>;
         }
@@ -104,7 +104,7 @@ export const columns5: ColumnDef<ChangeLog>[] = [
     },
     {
         accessorKey: "serial_tx",
-        header: "接收数据",
+        header: "数据",
         cell: ({ row }) => {
             return <p>{base64Decode(row.getValue("serial_tx") || '')}</p>;
         },

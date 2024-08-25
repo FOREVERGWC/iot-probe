@@ -14,9 +14,9 @@ function LoginPage() {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="mx-auto w-96 max-w-sm">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Login</CardTitle>
+            <CardTitle className="text-2xl font-bold">登录</CardTitle>
               <CardDescription className="text-center">
-                Login to System
+                登录系统
               </CardDescription>
           </CardHeader>
           <CardContent>

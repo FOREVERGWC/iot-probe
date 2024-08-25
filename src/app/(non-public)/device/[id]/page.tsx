@@ -178,8 +178,8 @@ export default function Page({ params }: { params: { id: string } }) {
             <RecordChangeTable title="以太网状态" device_id={params.id} columns={columns3} />
           </div>
           <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DataTable title="探针接收数据" device_id={params.id} columns={columns4} />
-            <DataTable title="探针发送数据" device_id={params.id} columns={columns5} />
+            <DataTable title="接收数据记录" device_id={params.id} columns={columns4} />
+            <DataTable title="发送数据记录" device_id={params.id} columns={columns5} />
           </div>
         </div>
       </div>

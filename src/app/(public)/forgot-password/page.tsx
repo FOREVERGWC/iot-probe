@@ -7,9 +7,9 @@ export default function ForgotPasswordPage() {
         <div className="flex items-center justify-center min-h-screen">
             <Card className="mx-auto w-96 max-w-sm">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Reset</CardTitle>
+                    <CardTitle className="text-2xl font-bold">找回</CardTitle>
                     <CardDescription className="text-center">
-                        Reset an Account
+                        找回密码
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
