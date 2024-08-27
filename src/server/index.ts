@@ -409,7 +409,7 @@ export const appRouter = router({
       where: {
         device_id: input.device_id,
       },
-      take: 100,
+      take: 200,
       orderBy: {
         update_time: "desc",
       },
