@@ -32,8 +32,10 @@ import EthernetStatus from "@/app/(non-public)/device/modules/EthernetStatus";
 import LongText from "@/app/(non-public)/device/modules/LongText";
 import Supplier from "@/app/(non-public)/device/[id]/modules/Supplier";
 import { saveAs } from "file-saver";
+import {useToast} from "@/components/ui/use-toast";
 
 export default function Page({ params }: { params: { id: string } }) {
+  const { toast } = useToast();
   const { data, mutate } = api.device.useSWR({ id: params.id });
   const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation();
   const { trigger: downloadDeviceLogs } = api.downloadDeviceLogs.useSWRMutation();
@@ -60,12 +62,6 @@ export default function Page({ params }: { params: { id: string } }) {
     return () => clearInterval(interval);
   }, [mutate]);
 
-  useEffect(() => {
-    if (data?.lastLog?.serial_tx) {
-      setSerialTx(base64Encode(data.lastLog.serial_tx));
-    }
-  }, [data]);
-
   const handleBlur = async () => {
     if (!serialTx.trim()) return;
 
@@ -75,6 +71,13 @@ export default function Page({ params }: { params: { id: string } }) {
     });
 
     await mutate();
+
+    toast({
+      title: "发送成功",
+      description: "您已成功发送信息！",
+    });
+
+    setSerialTx('')
   };
 
   const handleDownload = async () => {
