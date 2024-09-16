@@ -406,6 +406,21 @@ export const appRouter = router({
           data: updateData,
         });
       }),
+    clearDeviceLogs: procedure
+      .input(
+          z.object({
+              device_id: z.string().max(18),
+          })
+      )
+      .mutation(async ({ input }) => {
+          const { device_id } = input;
+          await prisma.device_log.deleteMany({
+              where: { device_id: device_id }
+          });
+          await prisma.device_change_log.deleteMany({
+              where: { device_id: device_id }
+          });
+      }),
   deleteDevice: procedure
       .input(
           z.object({
