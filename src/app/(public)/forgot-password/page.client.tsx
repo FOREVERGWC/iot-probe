@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/utils/trpc";
-import { useToast } from "@/components/ui/use-toast";  // 引入 useToast hook
+import { useToast } from "@/components/ui/use-toast";
 
 export const forgotPasswordSchema = z.object({
     phone: z
@@ -24,7 +24,12 @@ export const forgotPasswordSchema = z.object({
             message: "无效的电话号码格式",
         }),
     verificationCode: z.string().min(4, { message: "验证码至少需要 4 个字符" }),
-    newPassword: z.string().min(6, { message: "新密码至少需要 6 个字符" }).max(80)
+    newPassword: z.string()
+        .min(6, { message: "密码至少需要 6 个字符" })
+        .max(80, { message: "密码至多需要 20 个字符" })
+        .regex(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\S]+$/, {
+            message: "密码必须包含字母和数字",
+        })
 });
 
 function ForgotPasswordForm() {
@@ -52,7 +57,6 @@ function ForgotPasswordForm() {
                 variant: "default",
             });
         } catch (error) {
-            console.error("发送验证码失败:", error);
             toast({
                 title: "发送验证码失败",
                 description: "请重试",
@@ -71,7 +75,6 @@ function ForgotPasswordForm() {
             });
             router.push("/login");
         } catch (error) {
-            console.error("密码重置失败:", error);
             toast({
                 title: "密码重置失败",
                 description: "请重试",

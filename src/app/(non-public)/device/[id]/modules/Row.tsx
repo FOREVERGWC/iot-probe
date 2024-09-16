@@ -7,7 +7,7 @@ const Row: React.FC<{
     return (
         <div className="flex flex-row justify-between items-center">
             <span className="pr-2 font-medium">{label}</span>
-            <div className="flex-1 text-right max-w-full overflow-x-auto">{children}</div>
+            <div className="flex-1 text-right max-w-full overflow-x-auto font-mono">{children}</div>
         </div>
     );
 };

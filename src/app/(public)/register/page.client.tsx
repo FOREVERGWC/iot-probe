@@ -19,7 +19,12 @@ import { useToast } from "@/components/ui/use-toast";
 
 export const registerSchema = z.object({
     username: z.string().min(1, { message: "用户名不能为空" }),
-    password: z.string().min(6, { message: "密码至少需要 6 个字符" }),
+    password: z.string()
+        .min(6, { message: "密码至少需要 6 个字符" })
+        .max(80, { message: "密码至多需要 20 个字符" })
+        .regex(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\S]+$/, {
+            message: "密码必须包含字母和数字",
+        }),
     phone: z
         .string()
         .min(10, { message: "电话号码至少需要 10 个字符" })
@@ -33,7 +38,7 @@ function RegisterForm() {
     const router = useRouter();
     const { trigger: registerTrigger } = api.register.useSWRMutation();
     const { trigger: sendVerificationTrigger } = api.sendVerificationCode.useSWRMutation();
-    const { toast } = useToast();  // 使用 Toast 的 hook
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof registerSchema>>({
         resolver: zodResolver(registerSchema),
@@ -84,7 +89,6 @@ function RegisterForm() {
             return
         }
         const result = await sendVerificationTrigger({phone: phoneValue});
-        console.log(result);
         toast({
             title: "验证码已发送",
             description: "验证码已发送到您的手机，请注意查收。",

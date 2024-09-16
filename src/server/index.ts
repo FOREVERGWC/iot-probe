@@ -35,7 +35,12 @@ export const appRouter = router({
         .input(
             z.object({
                 username: z.string().max(20),
-                password: z.string().min(6).max(80),
+                password: z.string()
+                    .min(6, { message: "密码至少需要 6 个字符" })
+                    .max(80, { message: "密码至多需要 20 个字符" })
+                    .regex(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\S]+$/, {
+                        message: "密码必须包含字母和数字"
+                    }),
                 phone: z
                     .string()
                     .max(20)
@@ -173,7 +178,6 @@ export const appRouter = router({
 
             try {
                 const data = await client.SendSms(params);
-                console.log('请求成功！', data);
 
                 await prisma.code.create({
                     data: {
@@ -187,7 +191,6 @@ export const appRouter = router({
                     msg: "验证码发送成功",
                 };
             } catch (err) {
-                console.error("发送验证码失败", err);
                 throw new Error("验证码发送失败，请重试。");
             }
         }),
@@ -202,7 +205,12 @@ export const appRouter = router({
                         { message: "无效的电话号码格式" }
                     ),
                 verificationCode: z.string().min(4),
-                newPassword: z.string().min(1, { message: "密码不能为空" }).max(80)
+                newPassword: z.string()
+                    .min(6, { message: "密码至少需要 6 个字符" })
+                    .max(80, { message: "密码至多需要 20 个字符" })
+                    .regex(/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d\S]+$/, {
+                        message: "密码必须包含字母和数字",
+                    })
             })
         )
         .mutation(async ({ input }) => {
@@ -290,6 +298,14 @@ export const appRouter = router({
       if (!device) {
           return null;
       }
+      const firstLog = await prisma.device_log.findFirst({
+          where: {
+              device_id: device.device_id,
+          },
+          orderBy: {
+              update_time: 'asc'
+          }
+      })
       const lastLog = await prisma.device_log.findUnique({
         where: {
           id: device.latest_device_log_id,
@@ -305,6 +321,7 @@ export const appRouter = router({
       });
       return {
         device,
+        firstLog,
         lastLog,
         lastChangeLog
       };

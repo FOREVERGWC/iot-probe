@@ -119,6 +119,7 @@ export default function Page({ params }: { params: { id: string } }) {
               <Row label="固件版本">{data?.lastLog?.firmware_version}</Row>
               <Row label="最后日志 ID">{data?.device?.latest_device_log_id}</Row>
               <Row label="最后上线于">{formattedDate(data.lastLog?.update_time)}</Row>
+              <Row label="注册时间">{formattedDate(data.firstLog?.update_time)}</Row>
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button onClick={scrollToHistory}>查看历史日志</Button>

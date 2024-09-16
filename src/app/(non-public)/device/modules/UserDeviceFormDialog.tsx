@@ -74,7 +74,6 @@ export default function UserDeviceFormDialog({ deviceId, onSuccess, children }: 
                 description: "更新设备别名时发生错误，请重试。",
                 variant: "destructive",
             });
-            console.error("更新设备别名失败", error);
         }
     };
 

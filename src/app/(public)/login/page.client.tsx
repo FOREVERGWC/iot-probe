@@ -47,13 +47,12 @@ function LoginForm() {
             const result = await loginTrigger(values);
 
             if (result?.token) {
-                // 登录成功，存储用户信息到全局状态
                 dispatch({
                     type: "LOGIN",
                     payload: {
-                        id: result.user.id, // 假设从 API 返回了 id
+                        id: result.user.id,
                         username: values.username,
-                        token: result.token,
+                        token: result.token
                     },
                 });
 
@@ -83,7 +82,6 @@ function LoginForm() {
                 description: error?.message || "请重试或联系管理员。",
                 variant: "destructive",
             });
-            console.error("Login error:", error);
         }
     };
 
