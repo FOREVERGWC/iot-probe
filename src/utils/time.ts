@@ -73,7 +73,7 @@ export const getPowerVoltage = (serial_rx: string) => {
     if (!data) return '';
     const content = data.split(';');
     const result = content.find(item => item.startsWith('A3:'));
-    return `${result ? +result.split(':')[1] * 11 : ''} V`;
+    return `${result ? (+result.split(':')[1] * 11).toFixed(2) : ''} V`;
 }
 
 /**
@@ -86,7 +86,7 @@ export const getSuperCapVoltage = (serial_rx: string) => {
     if (!data) return '';
     const content = data.split(';');
     const result = content.find(item => item.startsWith('A2:'));
-    return `${result ? +result.split(':')[1] * 11 : ''} V`;
+    return `${result ? (+result.split(':')[1] * 11).toFixed(2) : ''} V`;
 }
 
 /**
@@ -112,7 +112,7 @@ export const getAnalogInput = (serial_rx: string) => {
     if (!data) return '';
     const content = data.split(';');
     const a0 = content.find(item => item.startsWith('A0:'));
-    const s0 = `${a0 ? a0.split(':')[1] : ''} V`;
+    const s0 = `${a0 ? a0.split(':')[1] : ''} V `;
     const a1 = content.find(item => item.startsWith('A1:'));
     const s1 = `${a1 ? a1.split(':')[1] : ''} V`;
     return s0 + s1;

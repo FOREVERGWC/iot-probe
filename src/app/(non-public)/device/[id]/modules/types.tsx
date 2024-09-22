@@ -96,7 +96,7 @@ export const columns4: ColumnDef<ChangeLog>[] = [
             const content = getDecodedContent(row);
             if (!content) return <p></p>;
             const data = content.find(item => item.startsWith('A3:'));
-            const power_voltage = `${data ? +data.split(':')[1] * 11 : ''} V`;
+            const power_voltage = `${data ? (+data.split(':')[1] * 11).toFixed(2) : ''} V`;
             return <p className="whitespace-nowrap">{power_voltage}</p>;
         },
     },
@@ -107,8 +107,8 @@ export const columns4: ColumnDef<ChangeLog>[] = [
             const content = getDecodedContent(row);
             if (!content) return <p></p>;
             const data = content.find(item => item.startsWith('A2:'));
-            const super_cap_voltage = `${data ? +data.split(':')[1] * 11 : ''} V`;
-            return <p>{super_cap_voltage}</p>;
+            const super_cap_voltage = `${data ? (+data.split(':')[1] * 11).toFixed(2) : ''} V`;
+            return <p className="whitespace-nowrap">{super_cap_voltage}</p>;
         },
     },
     {
@@ -150,7 +150,15 @@ export const columns4: ColumnDef<ChangeLog>[] = [
         cell: ({ row }) => {
             const content = getDecodedContent(row);
             if (!content) return <p></p>;
-            return <p>{content[0].split(':')[1] || ''} V {content[1].split(':')[1] || ''} V</p>;
+            const a0 = content.find(item => item.startsWith('A0:'));
+            const s0 = `${a0 ? a0.split(':')[1] : ''} V`;
+            const a1 = content.find(item => item.startsWith('A1:'));
+            const s1 = `${a1 ? a1.split(':')[1] : ''} V`;
+            return <p>
+                <span className="whitespace-nowrap">{s0}</span>
+                <br/>
+                <span className="whitespace-nowrap">{s1}</span>
+            </p>;
         },
     },
 ];
