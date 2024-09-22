@@ -1,6 +1,6 @@
-import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
-import { toZonedTime } from "date-fns-tz";
+import {format} from "date-fns";
+import {zhCN} from "date-fns/locale";
+import {toZonedTime} from "date-fns-tz";
 
 const timeZone = 'UTC';
 
@@ -52,3 +52,68 @@ export const base64Encode = (value: string): string => {
         return '';
     }
 };
+
+/**
+ * 提取数据字符串
+ * @param value 字符串
+ */
+export const extractContent = (value: string) => {
+    const regex = /\$(.*?)\$/;
+    const match = regex.exec(value);
+    return match ? match[1] : '';
+}
+
+/**
+ * 提取电源电压
+ * @param serial_rx 字符串
+ */
+export const getPowerVoltage = (serial_rx: string) => {
+    const value = base64Decode(serial_rx)
+    const data = extractContent(value);
+    if (!data) return '';
+    const content = data.split(';');
+    const result = content.find(item => item.startsWith('A3:'));
+    return `${result ? +result.split(':')[1] * 11 : ''} V`;
+}
+
+/**
+ * 提取超级电容电压
+ * @param serial_rx 字符串
+ */
+export const getSuperCapVoltage = (serial_rx: string) => {
+    const value = base64Decode(serial_rx)
+    const data = extractContent(value);
+    if (!data) return '';
+    const content = data.split(';');
+    const result = content.find(item => item.startsWith('A2:'));
+    return `${result ? +result.split(':')[1] * 11 : ''} V`;
+}
+
+/**
+ * 获取IO状态
+ * @param serial_rx 字符串
+ */
+export const getIO = (serial_rx: string) => {
+    const value = base64Decode(serial_rx)
+    const data = extractContent(value);
+    if (!data) return '';
+    const content = data.split(';');
+    const result = content.find(item => item.startsWith('IO:'));
+    return result ? result.split(':')[1] : '';
+}
+
+/**
+ * 获取模拟量状态
+ * @param serial_rx 字符串
+ */
+export const getAnalogInput = (serial_rx: string) => {
+    const value = base64Decode(serial_rx)
+    const data = extractContent(value);
+    if (!data) return '';
+    const content = data.split(';');
+    const a0 = content.find(item => item.startsWith('A0:'));
+    const s0 = `${a0 ? a0.split(':')[1] : ''} V`;
+    const a1 = content.find(item => item.startsWith('A1:'));
+    const s1 = `${a1 ? a1.split(':')[1] : ''} V`;
+    return s0 + s1;
+}

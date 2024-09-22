@@ -13,7 +13,15 @@ import {
 import Back from "@/components/ui/back";
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/loading";
-import { base64Decode, formattedDate, base64Encode } from "@/utils/time";
+import {
+  base64Decode,
+  formattedDate,
+  base64Encode,
+  getPowerVoltage,
+  getSuperCapVoltage,
+  getIO,
+  getAnalogInput
+} from "@/utils/time";
 import RecordChangeTable from "@/app/(non-public)/device/[id]/modules/RecordChangeTable";
 import {
   columns,
@@ -198,10 +206,10 @@ export default function Page({ params }: { params: { id: string } }) {
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>附加信息</CardTitle>
-              <Row label="电源电压">0</Row>
-              <Row label="超级电容电压">0</Row>
-              <Row label="IO状态">0</Row>
-              <Row label="模拟量状态">0</Row>
+              <Row label="电源电压">{getPowerVoltage(data?.lastLog?.serial_rx || '')}</Row>
+              <Row label="超级电容电压">{getSuperCapVoltage(data?.lastLog?.serial_rx || '')}</Row>
+              <Row label="IO状态">{getIO(data?.lastLog?.serial_rx || '')}</Row>
+              <Row label="模拟量状态">{getAnalogInput(data?.lastLog?.serial_rx || '')}</Row>
             </CardHeader>
           </Card>
           <div className="col-span-1 md:col-span-2 lg:col-span-4">

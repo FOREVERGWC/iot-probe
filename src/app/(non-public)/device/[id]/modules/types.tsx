@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { RouterOutput } from "@/utils/trpc";
-import { base64Decode, formattedDate } from "@/utils/time";
+import {base64Decode, extractContent, formattedDate} from "@/utils/time";
 import EthernetStatus from "@/app/(non-public)/device/modules/EthernetStatus";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
@@ -79,7 +79,7 @@ export const columns4: ColumnDef<ChangeLog>[] = [
         accessorKey: "update_time",
         header: "时间",
         cell: ({ row }) => {
-            return <p>{formattedDate(new Date(row.getValue("update_time")))}</p>;
+            return <p className="whitespace-nowrap">{formattedDate(new Date(row.getValue("update_time")))}</p>;
         },
     },
     {
@@ -88,8 +88,79 @@ export const columns4: ColumnDef<ChangeLog>[] = [
         cell: ({ row }) => {
             return <p>{base64Decode(row.getValue("serial_rx") || '')}</p>;
         }
-    }
+    },
+    {
+        accessorKey: "power_voltage",
+        header: "电源电压",
+        cell: ({ row }) => {
+            const content = getDecodedContent(row);
+            if (!content) return <p></p>;
+            const data = content.find(item => item.startsWith('A3:'));
+            const power_voltage = `${data ? +data.split(':')[1] * 11 : ''} V`;
+            return <p className="whitespace-nowrap">{power_voltage}</p>;
+        },
+    },
+    {
+        accessorKey: "super_cap_voltage",
+        header: "超级电容电压",
+        cell: ({ row }) => {
+            const content = getDecodedContent(row);
+            if (!content) return <p></p>;
+            const data = content.find(item => item.startsWith('A2:'));
+            const super_cap_voltage = `${data ? +data.split(':')[1] * 11 : ''} V`;
+            return <p>{super_cap_voltage}</p>;
+        },
+    },
+    {
+        accessorKey: "temperature",
+        header: "温度",
+        cell: ({ row }) => {
+            const content = getDecodedContent(row);
+            if (!content) return <p></p>;
+            const data = content.find(item => item.startsWith('T:'));
+            const temperature = `${data ? data.split(':')[1] : ''} °C`;
+            return <p className="whitespace-nowrap">{temperature}</p>;
+        },
+    },
+    {
+        accessorKey: "humidity",
+        header: "湿度",
+        cell: ({ row }) => {
+            const content = getDecodedContent(row);
+            if (!content) return <p></p>;
+            const data = content.find(item => item.startsWith('R:'));
+            const humidity = `${data ? data.split(':')[1] : ''} %`;
+            return <p className="whitespace-nowrap">{humidity}</p>;
+        },
+    },
+    {
+        accessorKey: "uptime",
+        header: "开机时间",
+        cell: ({ row }) => {
+            const content = getDecodedContent(row);
+            if (!content) return <p></p>;
+            const data = content.find(item => item.startsWith('C:'));
+            const uptime = `${data ? data.split(':')[1] : ''} 分`;
+            return <p className="whitespace-nowrap">{uptime}</p>;
+        },
+    },
+    {
+        accessorKey: "analog_input",
+        header: "模拟量输入值",
+        cell: ({ row }) => {
+            const content = getDecodedContent(row);
+            if (!content) return <p></p>;
+            return <p>{content[0].split(':')[1] || ''} V {content[1].split(':')[1] || ''} V</p>;
+        },
+    },
 ];
+
+const getDecodedContent = (row: any) => {
+    const content = base64Decode(row.getValue("serial_rx") || '');
+    const data = extractContent(content);
+    if (!data) return null;
+    return data.split(';');
+}
 
 /**
  * 探针接收数据
