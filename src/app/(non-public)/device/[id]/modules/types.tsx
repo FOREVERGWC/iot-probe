@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { RouterOutput } from "@/utils/trpc";
-import {base64Decode, extractContent, formattedDate} from "@/utils/time";
+import {base64Decode, extractContent, extractText, formattedDate} from "@/utils/time";
 import EthernetStatus from "@/app/(non-public)/device/modules/EthernetStatus";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
@@ -86,7 +86,9 @@ export const columns4: ColumnDef<ChangeLog>[] = [
         accessorKey: "serial_rx",
         header: "数据",
         cell: ({ row }) => {
-            return <p>{base64Decode(row.getValue("serial_rx") || '')}</p>;
+            const content = base64Decode(row.getValue("serial_rx") || '');
+            const text = extractText(content);
+            return <p>{text}</p>;
         }
     },
     {

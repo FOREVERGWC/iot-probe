@@ -120,8 +120,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
       tencentcloud-sdk-nodejs:
-        specifier: ^4.0.920
-        version: 4.0.920
+        specifier: ^4.0.945
+        version: 4.0.945
       tencentcloud-sdk-nodejs-sms:
         specifier: ^4.0.917
         version: 4.0.917
@@ -2823,8 +2823,8 @@ packages:
     resolution: {integrity: sha512-+wR4Sm7QNEnH5pfrBVA4Oa/l5bG3N2GiSXjJSM9s70fVq8t7yvSeGGA5h2maPRW1vuSSISAgI7j4vrX/spijTg==}
     engines: {node: '>=10'}
 
-  tencentcloud-sdk-nodejs@4.0.920:
-    resolution: {integrity: sha512-rBxC0CJAsz1i8aV3GFwKXTlL4wKU9dBVmEV3vAzV+g6tTIihRzbudX4S+kg8D9ER/R4SXgRw9V16U/dfS+W8Tg==}
+  tencentcloud-sdk-nodejs@4.0.945:
+    resolution: {integrity: sha512-+97fcne4enKSNBz9YaclVt9xbfvqdNRbzPj4VDHGRJ0ax0nduSGtuW9Q13C3wH4mHGFFCvLlchxpuvHK7q3qww==}
     engines: {node: '>=10'}
 
   text-table@0.2.0:
@@ -4545,7 +4545,7 @@ snapshots:
       eslint: 9.8.0
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(eslint@9.8.0))(eslint@9.8.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-typescript@3.6.1)(eslint@9.8.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(eslint@9.8.0))(eslint@9.8.0))(eslint@9.8.0)
       eslint-plugin-jsx-a11y: 6.9.0(eslint@9.8.0)
       eslint-plugin-react: 7.35.0(eslint@9.8.0)
       eslint-plugin-react-hooks: 4.6.2(eslint@9.8.0)
@@ -4569,7 +4569,7 @@ snapshots:
       enhanced-resolve: 5.17.1
       eslint: 9.8.0
       eslint-module-utils: 2.8.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(eslint@9.8.0))(eslint@9.8.0))(eslint@9.8.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-typescript@3.6.1)(eslint@9.8.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(eslint@9.8.0))(eslint@9.8.0))(eslint@9.8.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.6
       is-core-module: 2.13.1
@@ -4591,7 +4591,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-typescript@3.6.1)(eslint@9.8.0):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.2.0(eslint@9.8.0)(typescript@5.4.2))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(eslint@9.8.0))(eslint@9.8.0))(eslint@9.8.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.findlastindex: 1.2.5
@@ -5878,7 +5878,7 @@ snapshots:
       - encoding
       - supports-color
 
-  tencentcloud-sdk-nodejs@4.0.920:
+  tencentcloud-sdk-nodejs@4.0.945:
     dependencies:
       form-data: 3.0.1
       get-stream: 6.0.1

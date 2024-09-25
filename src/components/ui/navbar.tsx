@@ -49,7 +49,7 @@ export default function Navbar() {
                                 <Link href="/admin/device" className="text-white text-lg ml-6">
                                     设备管理
                                 </Link>
-                                <Link href="/admin/device" className="text-white text-lg ml-6">
+                                <Link href="/admin/server" className="text-white text-lg ml-6">
                                     服务器资源
                                 </Link>
                                 <Link href="/admin/device" className="text-white text-lg ml-6">

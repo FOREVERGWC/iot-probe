@@ -54,6 +54,15 @@ export const base64Encode = (value: string): string => {
 };
 
 /**
+ * 提取消息
+ * @param value
+ */
+export const extractText = (value: string | null | undefined) => {
+    if (!value) return '';
+    return value.replace(/\$.*?\$/g, '');
+}
+
+/**
  * 提取数据字符串
  * @param value 字符串
  */

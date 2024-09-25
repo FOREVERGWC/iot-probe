@@ -50,7 +50,7 @@ export default function Page() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {data.map(device => (
+                    {data.map((device: any) => (
                         <TableRow key={device.device_id}>
                             <TableCell>{device.device_id}</TableCell>
                             <TableCell>{device.latest_device_log_id}</TableCell>

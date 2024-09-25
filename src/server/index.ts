@@ -6,6 +6,7 @@ import { procedure, router } from "./trpc";
 import prisma from "@/libs/db";
 import { Parser } from "json2csv";
 import {base64Decode, formattedDate} from "@/utils/time";
+import os from 'os';
 // import { diff } from "json-diff-ts";
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
@@ -127,7 +128,7 @@ export const appRouter = router({
                     user_role_links: true
                 }
             });
-            console.log(user)
+
             if (!user) {
                 throw new Error("登陆失败！用户名或密码错误");
             }
@@ -148,6 +149,7 @@ export const appRouter = router({
                     id: user.id,
                     username: user.username
                 },
+                // @ts-ignore
                 roleIdList: user.user_role_links.map(item => item.role_id) || []
             };
         }),
@@ -600,6 +602,7 @@ export const appRouter = router({
                     msg: '删除成功！'
                 };
             }
+            // @ts-ignore
             const deviceLogIds = deviceLogs.map(log => log.id);
             await prisma.device_log.deleteMany({
                 where: { id: { in: deviceLogIds } }
@@ -735,6 +738,7 @@ export const appRouter = router({
                 }),
             ]);
 
+            // @ts-ignore
             const processedDeviceLogs = deviceLogs.map(log => {
                 const { iccid, ip, gateway, importance_level, ...rest } = log;
                 return {
@@ -750,6 +754,42 @@ export const appRouter = router({
             });
             const res = json2csvParser.parse(processedDeviceLogs);
             return `\ufeff${res}`;
+        }),
+    server: procedure
+        .query(async ({ ctx }) => {
+            const cpus = os.cpus();
+            const cpuUsage = cpus.map((cpu, index) => {
+                const total = Object.values(cpu.times).reduce((acc, time) => acc + time, 0);
+                const idle = cpu.times.idle;
+                const usage = ((total - idle) / total) * 100;
+                return { core: index + 1, usage: usage.toFixed(2) };
+            });
+
+            const totalMem = os.totalmem();
+            const freeMem = os.freemem();
+            const usedMem = totalMem - freeMem;
+            const memoryUsage = ((usedMem / totalMem) * 100).toFixed(2);
+
+            // let diskUsage = { total: 0, used: 0, free: 0, usage: 0 };
+            // try {
+            //     const diskInfo = await disk.check('/');
+            //     diskUsage = {
+            //         total: diskInfo.total,
+            //         used: diskInfo.total - diskInfo.free,
+            //         free: diskInfo.free,
+            //         usage: ((diskInfo.total - diskInfo.free) / diskInfo.total * 100).toFixed(2),
+            //     };
+            // } catch (error) {
+            //     console.error('Error fetching disk usage:', error);
+            // }
+
+            return {
+                cpuUsage,
+                totalMem,
+                usedMem,
+                memoryUsage,
+                // diskUsage,
+            }
         }),
 });
 // export type definition of API
