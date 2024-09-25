@@ -19,10 +19,13 @@ import Row from "@/app/(non-public)/device/[id]/modules/Row";
 import { Edit, Plus, Trash } from "lucide-react";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
+import {useToast} from "@/components/ui/use-toast";
+import * as React from "react";
 
 export default function Home() {
-    const { data, mutate } = api.devices.useSWR();
-    const { trigger: deleteTrigger } = api.deleteDevice.useSWRMutation();
+    const { toast } = useToast();
+    const { data, mutate } = api.myDevices.useSWR();
+    const { trigger: unbindDeviceTrigger } = api.unbindDevice.useSWRMutation();
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -32,13 +35,17 @@ export default function Home() {
         return () => clearInterval(interval);
     }, [mutate]);
 
-    if (!data) {
-        return <Loading />;
-    }
+    if (!data) return <Loading />
 
-    const handleDelete = async (deviceId: string) => {
-        await deleteTrigger({ device_id: deviceId });
+    const handleUnbind = async (deviceId: string) => {
+        await unbindDeviceTrigger({ device_id: deviceId });
+
         await mutate();
+
+        toast({
+            title: '解绑成功',
+            description: '您已成功解绑设备！',
+        });
     };
 
     return (
@@ -91,9 +98,9 @@ export default function Home() {
                                         <span className="ml-2">编辑</span>
                                     </Button>
                                 </UserDeviceFormDialog>
-                                <Button variant="destructive" onClick={() => handleDelete(device.device_id)}>
+                                <Button variant="destructive" onClick={() => handleUnbind(device.device_id)}>
                                     <Trash className="h-4 w-4" />
-                                    <span className="ml-2">删除</span>
+                                    <span className="ml-2">解绑</span>
                                 </Button>
                             </div>
                         </Card>

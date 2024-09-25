@@ -6,16 +6,18 @@ import { useRouter, usePathname } from "next/navigation";
 interface AuthState {
   id: number | null;
   username: string | null;
+  roleIdList: Array<number>;
   token: string | null;
 }
 
 type AuthAction =
-    | { type: "LOGIN"; payload: { id: number; username: string; token: string } }
+    | { type: "LOGIN"; payload: { id: number; username: string; roleIdList: Array<number>; token: string } }
     | { type: "LOGOUT" };
 
 const initialAuthState: AuthState = {
   id: null,
   username: null,
+  roleIdList: [],
   token: null,
 };
 
@@ -34,6 +36,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         ...state,
         id: action.payload.id,
         username: action.payload.username,
+        roleIdList: action.payload.roleIdList,
         token: action.payload.token,
       };
     case "LOGOUT":
@@ -41,6 +44,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         ...state,
         id: null,
         username: null,
+        roleIdList: [],
         token: null,
       };
     default:
@@ -59,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedToken = localStorage.getItem("token");
     const savedId = localStorage.getItem("id");
     const savedUsername = localStorage.getItem("username");
+    const savedRoleIdList = localStorage.getItem("roleIdList") || '[]';
 
     if (savedToken && savedId && savedUsername) {
       dispatch({
@@ -66,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: {
           id: parseInt(savedId),
           username: savedUsername,
+          roleIdList: JSON.parse(savedRoleIdList),
           token: savedToken,
         },
       });
@@ -78,12 +84,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("token", state.token);
       localStorage.setItem("id", state.id!.toString());
       localStorage.setItem("username", state.username!);
+      localStorage.setItem("roleIdList", JSON.stringify(state.roleIdList));
     } else {
       localStorage.removeItem("token");
       localStorage.removeItem("id");
       localStorage.removeItem("username");
+      localStorage.removeItem("roleIdList");
     }
-  }, [state.token, state.id, state.username]);
+  }, [state.token, state.id, state.username, state.roleIdList]);
 
   useEffect(() => {
     if (!isAuthInitialized) return; // 确保状态已初始化再执行路由逻辑

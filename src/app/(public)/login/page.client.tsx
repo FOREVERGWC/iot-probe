@@ -34,8 +34,8 @@ function LoginForm() {
     const form = useForm<z.infer<typeof authSchema>>({
         resolver: zodResolver(authSchema),
         defaultValues: {
-            username: "",
-            password: "",
+            username: '',
+            password: '',
             rememberMe: false,
         },
     });
@@ -48,10 +48,11 @@ function LoginForm() {
 
             if (result?.token) {
                 dispatch({
-                    type: "LOGIN",
+                    type: 'LOGIN',
                     payload: {
                         id: result.user.id,
                         username: values.username,
+                        roleIdList: result.roleIdList,
                         token: result.token
                     },
                 });

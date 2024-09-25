@@ -19,6 +19,7 @@ model device {
   alias_name           String  @db.VarChar(20) @default("")
   user_id              Int?
   user                 user?   @relation(fields: [user_id], references: [id])
+  @@index([user_id])
 }
 
 model device_change_log {
@@ -69,8 +70,27 @@ model user {
   password            String    @db.VarChar(80)
   phone               String    @db.VarChar(20)
   level               Int
-  remark              String    @db.VarChar(50)
+  remark              String    @db.VarChar(50) @default("")
+  user_role_links     user_role_link[]
   devices             device[]
+}
+
+model role {
+  id                  Int       @id @default(autoincrement())
+  name                String    @db.VarChar(20)
+  sort                Int
+  status              Boolean   @default(true)
+  user_role_links     user_role_link[]
+}
+
+model user_role_link {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  role_id             Int
+  user                user      @relation(fields: [user_id], references: [id])
+  role                role      @relation(fields: [role_id], references: [id])
+  @@index([user_id])
+  @@index([role_id])
 }
 
 model code {

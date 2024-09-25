@@ -92,12 +92,19 @@ export const appRouter = router({
                     password: hashedPassword,
                     phone,
                     level: 1,
-                    remark: remark || ""
+                    remark: remark || ''
                 },
             });
 
+            await prisma.user_role_link.create({
+                data: {
+                    user_id: user.id,
+                    role_id: 2
+                }
+            })
+
             return {
-                msg: "注册成功！",
+                msg: '注册成功！',
                 user: {
                     id: user.id,
                     username: user.username,
@@ -116,7 +123,11 @@ export const appRouter = router({
 
             const user = await prisma.user.findFirst({
                 where: { username },
+                include: {
+                    user_role_links: true
+                }
             });
+            console.log(user)
             if (!user) {
                 throw new Error("登陆失败！用户名或密码错误");
             }
@@ -135,8 +146,9 @@ export const appRouter = router({
                 token,
                 user: {
                     id: user.id,
-                    username: user.username,
+                    username: user.username
                 },
+                roleIdList: user.user_role_links.map(item => item.role_id) || []
             };
         }),
     sendVerificationCode: procedure
@@ -251,11 +263,15 @@ export const appRouter = router({
                 msg: "密码重置成功！",
             };
         }),
+    /**
+     * 查询全部设备
+     */
     devices: procedure.query(async ({ ctx }) => {
         const userId = ctx.id;
+        const roleIdList = ctx.roleIdList;
 
         const devices = await prisma.device.findMany({
-            where: { user_id: userId }, // 根据用户ID查询
+            where: roleIdList.includes(1) ? {} : { user_id: userId }
         });
 
         if (devices.length === 0) {
@@ -278,76 +294,157 @@ export const appRouter = router({
             }
         }
 
+        const deviceLogCounts = await prisma.device_log.groupBy({
+            by: ['device_id'],
+            _count: {
+                device_id: true,
+            },
+            where: {
+                device_id: {
+                    in: devices.map((device: any) => device.device_id),
+                },
+            },
+        });
+        const logCountMap = new Map<string, number>();
+        for (const logCount of deviceLogCounts) {
+            if (logCount.device_id !== null) {
+                logCountMap.set(logCount.device_id, logCount._count.device_id);
+            }
+        }
+
         return devices.map((device: any) => ({
             ...device,
+            device_log_num: logCountMap.get(device.device_id) || 0,
             device_log: latestLogsMap.get(device.device_id) || null,
         }));
     }),
-  device: procedure
-    .input(
-      z.object({
-        id: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
-      const device = await prisma.device.findUnique({
-        where: {
-          device_id: input.id,
-        },
-      });
-      if (!device) {
-          return null;
-      }
-      const firstLog = await prisma.device_log.findFirst({
-          where: {
-              device_id: device.device_id,
-          },
-          orderBy: {
-              update_time: 'asc'
-          }
-      })
-      const lastLog = await prisma.device_log.findUnique({
-        where: {
-          id: device.latest_device_log_id,
-        },
-      });
-      const lastChangeLog = await prisma.device_change_log.findFirst({
-        where: {
-          device_id: device.device_id,
-        },
-        orderBy: {
-          update_time: 'desc'
-        }
-      });
-      return {
-        device,
-        firstLog,
-        lastLog,
-        lastChangeLog
-      };
-    }),
-  createDevice: procedure
-      .input(
-          z.object({
-            device_id: z.string().max(18),
-            latest_device_log_id: z.number().optional(),
-            intranet_array: z.string().max(300),
-            extranet_array: z.string().max(300),
-            heartbeat: z.string().max(3),
-            is_online: z.boolean(),
-            serial_tx: z.string().max(200),
-            alias_name: z.string().max(20).optional(),
-          }),
-      )
-      .mutation(async ({ input }) => {
-        return prisma.device.create({
-            data: {
-                ...input,
-                latest_device_log_id: input.latest_device_log_id ?? 0,
-                alias_name: input.alias_name ?? ''
+    /**
+     * 查询我的设备
+     */
+    myDevices: procedure
+        .query(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+
+            const devices = await prisma.device.findMany({
+                where: { user_id: userId }
+            });
+
+            if (devices.length === 0) {
+                return [];
             }
-        });
-      }),
+
+            const deviceLogIds = devices.map((item: any) => item.latest_device_log_id);
+            const deviceLogs = await prisma.device_log.findMany({
+                where: {
+                    id: {
+                        in: deviceLogIds,
+                    },
+                },
+            });
+
+            const latestLogsMap = new Map<string, typeof deviceLogs[0]>();
+            for (const log of deviceLogs) {
+                if (log.device_id && !latestLogsMap.has(log.device_id)) {
+                    latestLogsMap.set(log.device_id, log);
+                }
+            }
+
+            const deviceLogCounts = await prisma.device_log.groupBy({
+                by: ['device_id'],
+                _count: {
+                    device_id: true,
+                },
+                where: {
+                    device_id: {
+                        in: devices.map((device: any) => device.device_id),
+                    },
+                },
+            });
+            const logCountMap = new Map<string, number>();
+            for (const logCount of deviceLogCounts) {
+                if (logCount.device_id !== null) {
+                    logCountMap.set(logCount.device_id, logCount._count.device_id);
+                }
+            }
+
+            return devices.map((device: any) => ({
+                ...device,
+                device_log_num: logCountMap.get(device.device_id) || 0,
+                device_log: latestLogsMap.get(device.device_id) || null,
+            }));
+        }),
+    /**
+     * 查询设备信息
+     */
+    device: procedure
+        .input(
+            z.object({
+                id: z.string(),
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { id: device_id } = input;
+            let device = await prisma.device.findUnique({
+                where: { device_id },
+            });
+            if (!device) {
+                throw new Error('查询失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id && device.user_id !== null) {
+                throw new Error('查询失败！无操作权限')
+            }
+            const firstLog = await prisma.device_log.findFirst({
+                where: {
+                  device_id: device.device_id,
+                },
+                orderBy: { update_time: 'asc' }
+            })
+            const lastLog = await prisma.device_log.findUnique({
+                where: {
+                  id: device.latest_device_log_id,
+                },
+            });
+            const lastChangeLog = await prisma.device_change_log.findFirst({
+                where: {
+                    device_id: device.device_id,
+                },
+                orderBy: {
+                    update_time: 'desc'
+                }
+            });
+            return {
+                device,
+                firstLog,
+                lastLog,
+                lastChangeLog
+            };
+    }),
+  // createDevice: procedure
+  //     .input(
+  //         z.object({
+  //           device_id: z.string().max(18),
+  //           latest_device_log_id: z.number().optional(),
+  //           intranet_array: z.string().max(300),
+  //           extranet_array: z.string().max(300),
+  //           heartbeat: z.string().max(3),
+  //           is_online: z.boolean(),
+  //           serial_tx: z.string().max(200),
+  //           alias_name: z.string().max(20).optional(),
+  //         }),
+  //     )
+  //     .mutation(async ({ input }) => {
+  //       return prisma.device.create({
+  //           data: {
+  //               ...input,
+  //               latest_device_log_id: input.latest_device_log_id ?? 0,
+  //               alias_name: input.alias_name ?? ''
+  //           }
+  //       });
+  //     }),
+    /**
+     * 更新设备别名
+     */
     updateDeviceAlias: procedure
         .input(
             z.object({
@@ -355,40 +452,67 @@ export const appRouter = router({
                 alias_name: z.string().max(20),
             })
         )
-        .mutation(async ({ input, ctx}) => {
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
             const { device_id, alias_name } = input;
-            const userId = ctx.id;
-
-            // 查找设备，确保它没有关联的用户或用户是自己
-            const device = await prisma.device.findUnique({
+            let device = await prisma.device.findUnique({
                 where: { device_id },
             });
-
             if (!device) {
-                throw new Error("设备未找到");
+                throw new Error('更新失败！设备不存在')
             }
-
-            if (device.user_id && device.user_id !== userId) {
-                throw new Error("您没有权限更新此设备");
+            if (!roleIdList.includes(1) && userId !== device.user_id && device.user_id !== null) {
+                throw new Error('更新失败！无操作权限')
             }
-
-            // 更新设备的 alias_name 并关联用户
-            const updatedDevice = await prisma.device.update({
+            device = await prisma.device.update({
                 where: { device_id },
                 data: {
                     alias_name,
-                    user_id: userId, // 关联当前用户
+                    user_id: userId
                 },
             });
-
             return {
-                msg: "设备别名更新成功",
-                device: updatedDevice,
+                msg: '更新成功！',
+                device: device,
             };
         }),
-  updateDevice: procedure
-      .input(
-          z.object({
+    /**
+     * 解绑设备
+     */
+    unbindDevice: procedure
+        .input(
+            z.object({
+                device_id: z.string().max(18)
+            })
+        ).mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { device_id } = input;
+            let device = await prisma.device.findUnique({
+                where: { device_id }
+            });
+            if (!device) {
+                throw new Error('解绑失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id) {
+                throw new Error('解绑失败！无操作权限')
+            }
+            device = await prisma.device.update({
+                where: { device_id },
+                data: {
+                    user_id: null
+                }
+            });
+            return {
+                msg: "解绑成功！",
+                device: device,
+            };
+        }),
+    /**
+     * 更新设备
+     */
+    updateDevice: procedure
+        .input(
+            z.object({
             device_id: z.string().max(18),
             latest_device_log_id: z.number().optional(),
             intranet_array: z.string().max(300).optional(),
@@ -398,84 +522,187 @@ export const appRouter = router({
             serial_tx: z.string().max(200).optional(),
             alias_name: z.string().max(20).optional(),
           }),
-      )
-      .mutation(async ({ input }) => {
-        const { device_id, ...updateData } = input;
-        return prisma.device.update({
-          where: {device_id},
-          data: updateData,
-        });
-      }),
+            )
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { device_id, ...updateData } = input;
+            let device = await prisma.device.findUnique({
+                where: { device_id }
+            });
+            if (!device) {
+                throw new Error('更新失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id) {
+                throw new Error('更新失败！无操作权限')
+            }
+            return prisma.device.update({
+                where: { device_id },
+                data: updateData,
+            });
+        }),
+    /**
+     * 清除设备历史数据
+     */
     clearDeviceLogs: procedure
       .input(
           z.object({
               device_id: z.string().max(18),
           })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ ctx, input }) => {
+          const { id: userId, roleIdList } = ctx;
           const { device_id } = input;
+          let device = await prisma.device.findUnique({
+              where: { device_id }
+          });
+          if (!device) {
+              throw new Error('清除失败！设备不存在')
+          }
+          if (!roleIdList.includes(1) && userId !== device.user_id) {
+              throw new Error('清除失败！无操作权限')
+          }
           await prisma.device_log.deleteMany({
-              where: { device_id: device_id }
+              where: { device_id }
           });
           await prisma.device_change_log.deleteMany({
-              where: { device_id: device_id }
+              where: { device_id }
           });
       }),
-  deleteDevice: procedure
-      .input(
-          z.object({
-            device_id: z.string().max(18),
-          }),
-      )
-      .mutation(async ({ input }) => {
-        return prisma.device.delete({
-          where: {device_id: input.device_id},
+    /**
+     * 删除指定条数的设备历史数据
+     */
+    deleteDeviceLogs: procedure
+        .input(
+            z.object({
+                device_id: z.string().max(18),
+                num: z.number().min(1)
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { device_id, num } = input;
+            let device = await prisma.device.findUnique({
+                where: { device_id }
+            });
+            if (!device) {
+                throw new Error('删除失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id) {
+                throw new Error('删除失败！无操作权限')
+            }
+            const deviceLogs = await prisma.device_log.findMany({
+                where: { device_id },
+                orderBy: { update_time: 'asc' },
+                take: num
+            });
+            if (!deviceLogs) {
+                return {
+                    msg: '删除成功！'
+                };
+            }
+            const deviceLogIds = deviceLogs.map(log => log.id);
+            await prisma.device_log.deleteMany({
+                where: { id: { in: deviceLogIds } }
+            });
+            return {
+                msg: '删除成功！'
+            };
+        }),
+    /**
+     * 删除设备
+     */
+    deleteDevice: procedure
+        .input(
+            z.object({
+                device_id: z.string().max(18),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { device_id } = input;
+            let device = await prisma.device.findUnique({
+                where: { device_id }
+            });
+            if (!device) {
+                throw new Error('删除失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id) {
+                throw new Error('删除失败！无操作权限')
+            }
+            await prisma.device.delete({
+                where: { device_id }
+            });
+            return {
+                msg: '删除成功！'
+            };
+      }),
+    /**
+     * 查询设备历史数据
+     */
+    deviceLogs: procedure.input(
+        z.object({
+            device_id: z.string()
+        })
+    ).query(async ({ ctx, input }) => {
+        const { id: userId, roleIdList } = ctx;
+        const { device_id } = input;
+        let device = await prisma.device.findUnique({
+            where: { device_id }
         });
-      }),
-  deviceLogs: procedure.input(
-      z.object({
-        device_id: z.string()
-      })
-  ).query(async ({ input }) => {
-    return prisma.device_log.findMany({
-      where: {
-        device_id: input.device_id,
-      },
-      take: 200,
-      orderBy: {
-        update_time: "desc",
-      },
-    })
-  }),
-  deviceChangeLog: procedure
-    .input(
-      z.object({
-        device_id: z.string(),
-        filter: z.string().optional()
-      }),
-    )
-    .query(async ({ input }) => {
-        const filterCondition: any = {};
-        if (input.filter === "online") {
-            filterCondition.online = {
-                not: 0,
-            };
-        } else if (input.filter === "electric") {
-            filterCondition.electric = {
-                not: 0,
-            };
+        if (!device) {
+            throw new Error('查询失败！设备不存在')
         }
-      return prisma.device_change_log.findMany({
-        where: {
-          device_id: input.device_id,
-            ...filterCondition
-        },
-        take: 200,
-        orderBy: {
-          update_time: "desc",
-        },
-      });
+        if (!roleIdList.includes(1) && userId !== device.user_id) {
+            throw new Error('查询失败！无操作权限')
+        }
+        return prisma.device_log.findMany({
+            where: { device_id },
+            take: 200,
+            orderBy: { update_time: 'desc' },
+        })
     }),
+    deviceChangeLog: procedure.input(
+            z.object({
+                device_id: z.string(),
+                filter: z.string().optional()
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { device_id } = input;
+            let device = await prisma.device.findUnique({
+                where: { device_id }
+            });
+            if (!device) {
+                throw new Error('查询失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id) {
+                throw new Error('查询失败！无操作权限')
+            }
+            const filterCondition: any = {};
+            if (input.filter === "online") {
+                filterCondition.online = {
+                    not: 0,
+                };
+            } else if (input.filter === "electric") {
+                filterCondition.electric = {
+                    not: 0,
+                };
+            }
+            return prisma.device_change_log.findMany({
+                where: {
+                    device_id: input.device_id,
+                    ...filterCondition
+                },
+                take: 200,
+                orderBy: {
+                update_time: "desc",
+            },
+        });
+    }),
+    /**
+     * 下载设备历史数据
+     */
     downloadDeviceLogs: procedure
         .input(
             z.object({
@@ -483,9 +710,18 @@ export const appRouter = router({
                 version: z.string(),
             }),
         )
-        .mutation(async ({ input }) => {
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
             const { device_id, version } = input;
-
+            let device = await prisma.device.findUnique({
+                where: { device_id }
+            });
+            if (!device) {
+                throw new Error('下载失败！设备不存在')
+            }
+            if (!roleIdList.includes(1) && userId !== device.user_id) {
+                throw new Error('下载失败！无操作权限')
+            }
             let maxRecords = 1440;
             if (version.includes("PRO")) {
                 maxRecords = 10000;

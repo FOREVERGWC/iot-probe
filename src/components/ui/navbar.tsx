@@ -16,7 +16,6 @@ export default function Navbar() {
 
     useEffect(() => {
         if (state.token) {
-            // 如果 token 存在，用户已经登录
             console.log("用户已登录");
         } else {
             // 用户未登录
@@ -24,31 +23,45 @@ export default function Navbar() {
         }
     }, [state.token]);
 
+    const isAdmin = state.roleIdList.includes(1)
+
     const handleLogout = () => {
         dispatch({ type: "LOGOUT" });
-        router.push("/login");
+        router.push('/login');
     };
 
     return (
         <NavigationMenu className="bg-gray-800 p-4">
             <NavigationMenuList>
-                {/* 网站名称，左对齐 */}
                 <NavigationMenuItem>
-          <span className="text-white text-lg font-bold">
-            九溪云服务
-          </span>
+                  <span className="text-white text-lg font-bold">
+                    九溪云服务
+                  </span>
                 </NavigationMenuItem>
 
-                {/* 中间的首页导航 */}
                 <NavigationMenuItem>
                     <Link href="/" className="text-white text-lg ml-6">
                         首页
                     </Link>
+                    {
+                        isAdmin && (
+                            <>
+                                <Link href="/admin/device" className="text-white text-lg ml-6">
+                                    设备管理
+                                </Link>
+                                <Link href="/admin/device" className="text-white text-lg ml-6">
+                                    服务器资源
+                                </Link>
+                                <Link href="/admin/device" className="text-white text-lg ml-6">
+                                    服务协议
+                                </Link>
+                            </>
+                        )
+                    }
                 </NavigationMenuItem>
 
                 <div className="flex-grow"></div>
 
-                {/* 用户部分，右对齐 */}
                 <NavigationMenuItem>
                     {state.token ? (
                         <span
