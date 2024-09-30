@@ -1,10 +1,10 @@
-import { Client } from "tencentcloud-sdk-nodejs/tencentcloud/services/sms/v20210111/sms_client";
-import { z } from "zod";
+import {Client} from "tencentcloud-sdk-nodejs/tencentcloud/services/sms/v20210111/sms_client";
+import {z} from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { procedure, router } from "./trpc";
+import {procedure, router} from "./trpc";
 import prisma from "@/libs/db";
-import { Parser } from "json2csv";
+import {Parser} from "json2csv";
 import {base64Decode, formattedDate} from "@/utils/time";
 import os from 'os';
 // import { diff } from "json-diff-ts";
@@ -269,17 +269,13 @@ export const appRouter = router({
      * 查询全部设备
      */
     devices: procedure.query(async ({ ctx }) => {
-        const userId = ctx.id;
-        const roleIdList = ctx.roleIdList;
-
+        const { id: userId, roleIdList } = ctx;
         const devices = await prisma.device.findMany({
             where: roleIdList.includes(1) ? {} : { user_id: userId }
         });
-
         if (devices.length === 0) {
             return [];
         }
-
         const deviceLogIds = devices.map((item: any) => item.latest_device_log_id);
         const deviceLogs = await prisma.device_log.findMany({
             where: {
@@ -326,15 +322,12 @@ export const appRouter = router({
     myDevices: procedure
         .query(async ({ ctx, input }) => {
             const { id: userId, roleIdList } = ctx;
-
             const devices = await prisma.device.findMany({
                 where: { user_id: userId }
             });
-
             if (devices.length === 0) {
                 return [];
             }
-
             const deviceLogIds = devices.map((item: any) => item.latest_device_log_id);
             const deviceLogs = await prisma.device_log.findMany({
                 where: {
@@ -791,6 +784,47 @@ export const appRouter = router({
                 // diskUsage,
             }
         }),
+    /**
+     * 查询全部附件
+     */
+    enclosures: procedure.query(async ({ ctx }) => {
+        const { id: userId, roleIdList } = ctx;
+        if (!roleIdList.includes(1)) {
+            throw new Error('查询失败！无操作权限')
+        }
+        return prisma.enclosure.findMany();
+    }),
+    /**
+     * 更新附件
+     */
+    enclosureUpdate: procedure
+        .input(
+            z.object({
+                id: z.number(),
+                file_path: z.string().min(1),
+                file_name: z.string().min(1)
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId, roleIdList } = ctx;
+            const { id, file_path, file_name } = input;
+            let enclosure = await prisma.enclosure.findUnique({
+                where: { id }
+            });
+            if (!enclosure) {
+                throw new Error('更新失败！附件不存在')
+            }
+            if (!roleIdList.includes(1)) {
+                throw new Error('更新失败！无操作权限')
+            }
+            return prisma.enclosure.update({
+                where: { id },
+                data: {
+                    file_path,
+                    file_name
+                }
+            });
+    }),
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

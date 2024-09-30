@@ -99,3 +99,11 @@ model code {
   code                String    @db.VarChar(4)
   expires_at          DateTime  @db.DateTime(0)
 }
+
+model enclosure {
+  id                  Int       @id @default(autoincrement())
+  name                String    @db.VarChar(20)
+  key                 String    @db.VarChar(20)
+  file_path           String    @db.VarChar(50)
+  file_name           String    @db.VarChar(50)
+}

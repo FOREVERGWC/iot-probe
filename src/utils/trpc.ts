@@ -3,6 +3,7 @@ import { httpBatchLink } from "@trpc/client";
 import type { AppRouter } from "@/server";
 import { createSWRProxyHooks } from "@trpc-swr/client";
 import { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import {FileRouter} from "@/server/file";
 
 function getBaseUrl() {
   if (typeof window !== "undefined")
@@ -41,5 +42,21 @@ export const api = createSWRProxyHooks<AppRouter>({
   // transformer: SuperJSON,
 });
 
+export const fileApi = createSWRProxyHooks<FileRouter>({
+  links: [
+    httpBatchLink({
+      url: `${getBaseUrl()}/api/file`,
+      headers: () => {
+        if (typeof window !== 'undefined') {
+          const token = localStorage.getItem('token');
+          return {
+            Authorization: token ? `Bearer ${token}` : undefined,
+          };
+        }
+        return {};
+      },
+    }),
+  ],
+})
 export type RouterInput = inferRouterInputs<AppRouter>;
 export type RouterOutput = inferRouterOutputs<AppRouter>;

@@ -2,6 +2,7 @@ import { inferAsyncReturnType } from '@trpc/server';
 import { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
 import jwt from 'jsonwebtoken';
 import prisma from "@/libs/db";
+import {TRPCClientError} from "@trpc/client";
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
 
@@ -19,7 +20,7 @@ export async function createContext({ req }: FetchCreateContextFnOptions) {
             });
             roleIdList = roleList.map(item => item.role_id)
         } catch (error) {
-            throw new Error('无效的 token');
+            throw new TRPCClientError('无效的 token');
         }
     }
 
