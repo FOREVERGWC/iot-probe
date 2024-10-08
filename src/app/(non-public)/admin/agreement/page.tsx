@@ -27,7 +27,8 @@ export default function Page() {
     if (!data) return <Loading />
 
     const downloadFile = (path: string) => {
-        window.open(path, '_blank');
+        const base = window.location.origin;
+        window.open(`${base}/${path}`, '_blank');
     }
 
     const handleUpload = async () => {
@@ -112,7 +113,7 @@ export default function Page() {
 
                 {selectedEnclosure && (
                     <div className="mb-4">
-                            <p className="text-lg mb-2">当前文件: {selectedEnclosure.file_name}</p>
+                            <p className="text-lg mb-2">当前文件: {selectedEnclosure.file_path}</p>
                             <button
                                 onClick={() => downloadFile(selectedEnclosure.file_path)}
                                 disabled={!selectedEnclosure.file_name}

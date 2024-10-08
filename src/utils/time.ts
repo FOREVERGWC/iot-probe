@@ -108,7 +108,13 @@ export const getIO = (serial_rx: string) => {
     if (!data) return '';
     const content = data.split(';');
     const result = content.find(item => item.startsWith('IO:'));
-    return result ? result.split(':')[1] : '';
+    if (!result) return '';
+    const arr = result.split(':')[1].split('')
+    let res = ''
+    for (let i = 0; i < arr.length; i++) {
+        res += `D${i}:${arr[i]}${i !== arr.length - 1 ? ' ' : ''}`
+    }
+    return res;
 }
 
 /**
@@ -121,8 +127,8 @@ export const getAnalogInput = (serial_rx: string) => {
     if (!data) return '';
     const content = data.split(';');
     const a0 = content.find(item => item.startsWith('A0:'));
-    const s0 = `${a0 ? a0.split(':')[1] : ''} V `;
+    const s0 = `A0: ${a0 ? a0.split(':')[1] : ''} V `;
     const a1 = content.find(item => item.startsWith('A1:'));
-    const s1 = `${a1 ? a1.split(':')[1] : ''} V`;
+    const s1 = `A1: ${a1 ? a1.split(':')[1] : ''} V`;
     return s0 + s1;
 }

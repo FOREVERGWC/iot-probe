@@ -113,28 +113,28 @@ export const columns4: ColumnDef<ChangeLog>[] = [
             return <p className="whitespace-nowrap">{super_cap_voltage}</p>;
         },
     },
-    {
-        accessorKey: "temperature",
-        header: "温度",
-        cell: ({ row }) => {
-            const content = getDecodedContent(row);
-            if (!content) return <p></p>;
-            const data = content.find(item => item.startsWith('T:'));
-            const temperature = `${data ? data.split(':')[1] : ''} °C`;
-            return <p className="whitespace-nowrap">{temperature}</p>;
-        },
-    },
-    {
-        accessorKey: "humidity",
-        header: "湿度",
-        cell: ({ row }) => {
-            const content = getDecodedContent(row);
-            if (!content) return <p></p>;
-            const data = content.find(item => item.startsWith('R:'));
-            const humidity = `${data ? data.split(':')[1] : ''} %`;
-            return <p className="whitespace-nowrap">{humidity}</p>;
-        },
-    },
+    // {
+    //     accessorKey: "temperature",
+    //     header: "温度",
+    //     cell: ({ row }) => {
+    //         const content = getDecodedContent(row);
+    //         if (!content) return <p></p>;
+    //         const data = content.find(item => item.startsWith('T:'));
+    //         const temperature = `${data ? data.split(':')[1] : ''} °C`;
+    //         return <p className="whitespace-nowrap">{temperature}</p>;
+    //     },
+    // },
+    // {
+    //     accessorKey: "humidity",
+    //     header: "湿度",
+    //     cell: ({ row }) => {
+    //         const content = getDecodedContent(row);
+    //         if (!content) return <p></p>;
+    //         const data = content.find(item => item.startsWith('R:'));
+    //         const humidity = `${data ? data.split(':')[1] : ''} %`;
+    //         return <p className="whitespace-nowrap">{humidity}</p>;
+    //     },
+    // },
     {
         accessorKey: "uptime",
         header: "开机时间",
@@ -157,9 +157,9 @@ export const columns4: ColumnDef<ChangeLog>[] = [
             const a1 = content.find(item => item.startsWith('A1:'));
             const s1 = `${a1 ? a1.split(':')[1] : ''} V`;
             return <p>
-                <span className="whitespace-nowrap">{s0}</span>
+                <span className="whitespace-nowrap font-mono">A0: {s0}</span>
                 <br/>
-                <span className="whitespace-nowrap">{s1}</span>
+                <span className="whitespace-nowrap font-mono">A1: {s1}</span>
             </p>;
         },
     },

@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import UserDeviceFormDialog from "@/app/(non-public)/device/modules/UserDeviceFormDialog";
 import EmptyState from "@/components/ui/empty";
 import Row from "@/app/(non-public)/device/[id]/modules/Row";
-import { Edit, Plus, Trash } from "lucide-react";
+import {Download, Edit, Plus, Trash} from "lucide-react";
 import PowerStatus from "@/app/(non-public)/device/modules/PowerStatus";
 import OnlineStatus from "@/app/(non-public)/device/modules/OnlineStatus";
 import {useToast} from "@/components/ui/use-toast";
@@ -25,6 +25,8 @@ import * as React from "react";
 export default function Home() {
     const { toast } = useToast();
     const { data, mutate } = api.myDevices.useSWR();
+    const { data: serviceAgreement } = api.serviceAgreement.useSWR();
+    const { data: productDescription } = api.productDescription.useSWR();
     const { trigger: unbindDeviceTrigger } = api.unbindDevice.useSWRMutation();
 
     useEffect(() => {
@@ -57,6 +59,14 @@ export default function Home() {
                         <span className="ml-2">添加设备</span>
                     </Button>
                 </UserDeviceFormDialog>
+                <Button variant="ghost" onClick={() => serviceAgreement?.file_path && window.open(serviceAgreement.file_path, '_blank')}>
+                    <Download className="h-4 w-4" />
+                    <span className="ml-2">服务协议</span>
+                </Button>
+                <Button variant="ghost" onClick={() => productDescription?.file_path && window.open(productDescription.file_path, '_blank')}>
+                    <Download className="h-4 w-4" />
+                    <span className="ml-2">产品说明</span>
+                </Button>
             </div>
 
             {data.length === 0 ? (

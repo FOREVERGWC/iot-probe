@@ -70,6 +70,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   const [serialTx, setSerialTx] = useState("");
   const historyRef = useRef<HTMLDivElement>(null);
+  const isLiteVersion = data?.lastLog?.firmware_version?.includes('Lite');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -176,16 +177,18 @@ export default function Page({ params }: { params: { id: string } }) {
               </div>
             </CardFooter>
           </Card>
-          <Card className="col-span-1">
-            <CardHeader>
-              <CardTitle>有线网络</CardTitle>
-              <Row label="设备 IP">{data?.device?.intranet_array.split(",")[0]}</Row>
-              <Row label="网关 IP">{data?.device?.intranet_array.split(",")[1]}</Row>
-              <Row label="以太网状态">
-                <EthernetStatus ethernet={data?.lastChangeLog?.ethernet}/>
-              </Row>
-            </CardHeader>
-          </Card>
+          {!isLiteVersion && (
+              <Card className="col-span-1">
+                <CardHeader>
+                  <CardTitle>有线网络</CardTitle>
+                  <Row label="设备 IP">{data?.device?.intranet_array.split(",")[0]}</Row>
+                  <Row label="网关 IP">{data?.device?.intranet_array.split(",")[1]}</Row>
+                  <Row label="以太网状态">
+                    <EthernetStatus ethernet={data?.lastChangeLog?.ethernet}/>
+                  </Row>
+                </CardHeader>
+              </Card>
+          )}
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>电源状态</CardTitle>
@@ -276,21 +279,23 @@ export default function Page({ params }: { params: { id: string } }) {
               </CardContent>
             </Card>
           </div>
-          <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <IntranetStatusCard
-                deviceId={params.id}
-                intranetArray={data?.device?.intranet_array}
-                intranetPingArray={data.lastLog?.intranet_ping_array}
-                onSuccess={mutate}
-            />
-            <ExtranetStatusCard
-                deviceId={params.id}
-                extranetArray={data?.device?.extranet_array}
-                extranetPing={data.lastLog?.extranet_ping!}
-                extranetPingLarge={data.lastLog?.extranet_ping_large!}
-                onSuccess={mutate}
-            />
-          </div>
+          {!isLiteVersion && (
+              <div className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <IntranetStatusCard
+                    deviceId={params.id}
+                    intranetArray={data?.device?.intranet_array}
+                    intranetPingArray={data.lastLog?.intranet_ping_array}
+                    onSuccess={mutate}
+                />
+                <ExtranetStatusCard
+                    deviceId={params.id}
+                    extranetArray={data?.device?.extranet_array}
+                    extranetPing={data.lastLog?.extranet_ping!}
+                    extranetPingLarge={data.lastLog?.extranet_ping_large!}
+                    onSuccess={mutate}
+                />
+              </div>
+          )}
           {/* TODO 父组件查询日志传递给子组件，防止重复查询 */}
           <div ref={historyRef}
                className="col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -306,12 +311,14 @@ export default function Page({ params }: { params: { id: string } }) {
                 data={electricData as Array<any>}
                 isLoading={isElectricLoading}
             />
-            <RecordChangeTable
-                title="以太网状态"
-                columns={columns3}
-                data={ethernetData as Array<any>}
-                isLoading={isEthernetLoading}
-            />
+            {!isLiteVersion && (
+                <RecordChangeTable
+                    title="以太网状态"
+                    columns={columns3}
+                    data={ethernetData as Array<any>}
+                    isLoading={isEthernetLoading}
+                />
+            )}
           </div>
           <div className="col-span-1 lg:col-span-4 space-y-4">
             <DataTable title="接收数据记录" device_id={params.id} columns={columns4}/>

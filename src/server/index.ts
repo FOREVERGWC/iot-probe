@@ -825,6 +825,26 @@ export const appRouter = router({
                 }
             });
     }),
+    /**
+     * 服务协议
+     */
+    serviceAgreement: procedure.query(async ({ ctx }) => {
+        return prisma.enclosure.findFirst({
+            where: {
+                key: '服务协议'
+            }
+        });
+    }),
+    /**
+     * 产品说明
+     */
+    productDescription: procedure.query(async ({ ctx }) => {
+        return prisma.enclosure.findFirst({
+            where: {
+                key: '产品说明'
+            }
+        });
+    })
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
