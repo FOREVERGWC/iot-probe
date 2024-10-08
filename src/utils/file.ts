@@ -1,3 +1,4 @@
+// @ts-ignore
 import multer from 'multer';
 import { NextApiRequest } from "next";
 import fs from "fs";
