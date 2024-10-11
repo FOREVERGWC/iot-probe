@@ -45,7 +45,7 @@ export const api = createSWRProxyHooks<AppRouter>({
 export const fileApi = createSWRProxyHooks<FileRouter>({
   links: [
     httpBatchLink({
-      url: `${getBaseUrl()}/api/file`,
+      url: `${getBaseUrl()}/api/common/upload`,
       headers: () => {
         if (typeof window !== 'undefined') {
           const token = localStorage.getItem('token');

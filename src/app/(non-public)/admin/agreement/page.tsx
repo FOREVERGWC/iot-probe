@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {api, fileApi} from "@/utils/trpc";
 import Loading from "@/app/loading";
 import {useToast} from "@/components/ui/use-toast";
@@ -18,10 +18,16 @@ interface Enclosure {
 export default function Page() {
     const { toast } = useToast();
     const { data, error, mutate } = api.enclosures.useSWR();
-    const { trigger: uploadFileTrigger } = fileApi.upload.useSWRMutation();
+    // const { trigger: uploadFileTrigger } = fileApi.upload.useSWRMutation();
     const { trigger: enclosureUpdateTrigger } = api.enclosureUpdate.useSWRMutation();
     const [selectedEnclosure, setSelectedEnclosure] = useState<Enclosure>();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    useEffect(() => {
+        if (data && data.length > 0) {
+            setSelectedEnclosure(data[0]);
+        }
+    }, [data]);
 
     if (error) return <div>加载附件时出错！</div>;
     if (!data) return <Loading />
@@ -43,41 +49,17 @@ export default function Page() {
         const formData = new FormData();
         formData.append('file', selectedFile);
 
-        try {
-            // @ts-ignore
-            await uploadFileTrigger(formData)
-            // const response = await fetch('/api/file/upload', {
-            //     method: 'POST',
-            //     body: formData,
-            // });
-            //
-            // if (response.ok) {
-            //     const data = await response.json();
-            //     toast({
-            //         title: '上传成功',
-            //         description: `文件 ${data.file_name} 上传成功！`,
-            //     });
-            //
-            //     await mutate();
-            // } else {
-            //     const errorData = await response.json();
-            //     toast({
-            //         title: '上传失败',
-            //         description: errorData.error || '文件上传失败，请重试！',
-            //         variant: 'destructive',
-            //     });
-            // }
-        } catch (error) {
-            toast({
-                title: '上传失败',
-                description: '网络错误，请稍后重试！',
-                variant: 'destructive',
-            });
-        }
+        let path = ''
+        fetch('/api/common/upload', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => handleUpdate(selectedEnclosure?.id || 1, data.data, data.data))
     }
 
-    const handleUpdate = async (id: number) => {
-        // await enclosureUpdateTrigger({ id: id, file_path: file_path, file_name: file_name });
+    const handleUpdate = async (id: number, file_path: string, file_name: string) => {
+        await enclosureUpdateTrigger({ id: id, file_path: file_path, file_name: file_name });
 
         await mutate();
 
