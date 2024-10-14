@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -17,7 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/utils/trpc";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/provider/auth.provider"; // 引入 useAuth
+import { useAuth } from "@/provider/auth.provider";
+import { Eye, EyeSlash } from "phosphor-react";
 
 export const authSchema = z.object({
     username: z.string().min(1, { message: "用户名不能为空" }),
@@ -107,7 +108,7 @@ function LoginForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <div className="relative space-y-2">
+                                <div className="relative space-y-1">
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="密码"
@@ -120,13 +121,11 @@ function LoginForm() {
                                         variant="ghost"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >
-                    <span
-                        className={`${
-                            showPassword
-                                ? "icon-[ph--eye-slash-bold]"
-                                : "icon-[ph--eye-bold]"
-                        }`}
-                    />
+                                        {showPassword ? (
+                                            <Eye size={16} weight="bold" />
+                                        ) : (
+                                            <EyeSlash size={16} weight="bold" />
+                                        )}
                                     </Button>
                                 </div>
                             </FormControl>
