@@ -556,11 +556,33 @@ export const appRouter = router({
           if (!roleIdList.includes(1) && userId !== device.user_id) {
               throw new Error('清除失败！无操作权限')
           }
-          await prisma.device_log.deleteMany({
-              where: { device_id }
-          });
-          await prisma.device_change_log.deleteMany({
-              where: { device_id }
+          await prisma.$transaction(async (prisma) => {
+              //
+              const deviceLogs = await prisma.device_log.findMany({
+                  where: { device_id },
+                  orderBy: { update_time: 'desc' }
+              });
+              const deviceLogIds = deviceLogs.slice(1)
+              if (deviceLogIds.length > 0) {
+                  await prisma.device_log.deleteMany({
+                      where: {
+                          id: { in: deviceLogIds.map(item => item.id) }
+                      }
+                  })
+              }
+              //
+              const deviceChangeLogs = await prisma.device_change_log.findMany({
+                  where: { device_id },
+                  orderBy: { update_time: 'desc' }
+              });
+              const deviceChangeLogIds = deviceChangeLogs.slice(1)
+              if (deviceChangeLogIds.length > 0) {
+                  await prisma.device_change_log.deleteMany({
+                      where: {
+                          id: { in: deviceChangeLogIds.map(item => item.id) }
+                      }
+                  })
+              }
           });
       }),
     /**

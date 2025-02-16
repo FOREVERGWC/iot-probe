@@ -20,7 +20,7 @@ import {
   getPowerVoltage,
   getSuperCapVoltage,
   getIO,
-  getAnalogInput
+  getAnalogInput, getTemperature, getHumidity
 } from "@/utils/time";
 import RecordChangeTable from "@/app/(non-public)/device/[id]/modules/RecordChangeTable";
 import {
@@ -42,10 +42,12 @@ import Supplier from "@/app/(non-public)/device/[id]/modules/Supplier";
 import { saveAs } from "file-saver";
 import {useToast} from "@/components/ui/use-toast";
 import {Checkbox} from "@/components/ui/checkbox";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const { data, mutate } = api.device.useSWR({ id: params.id });
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation();
   const { trigger: clearDeviceLogs } = api.clearDeviceLogs.useSWRMutation();
   const { trigger: downloadDeviceLogs } = api.downloadDeviceLogs.useSWRMutation();
@@ -120,8 +122,9 @@ export default function Page({ params }: { params: { id: string } }) {
     await mutate();
     toast({
       title: "清除成功",
-      description: "您已成功清除数据！",
-    });
+      description: "您已成功清除数据！"
+    })
+    setIsDialogOpen(false)
   }
 
   const handleDownload = async () => {
@@ -172,7 +175,20 @@ export default function Page({ params }: { params: { id: string } }) {
             <CardFooter className="flex justify-between">
               <Button onClick={scrollToHistory}>历史日志</Button>
               <div className="flex gap-1">
-                <Button variant="destructive" onClick={handleClear}>清除数据</Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">清除数据</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>清除数据</DialogTitle>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>取消</Button>
+                      <Button variant="destructive" onClick={handleClear}>确认</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
                 <Button variant="outline" onClick={handleDownload}>下载数据</Button>
               </div>
             </CardFooter>
@@ -213,6 +229,8 @@ export default function Page({ params }: { params: { id: string } }) {
               <Row label="超级电容电压">{getSuperCapVoltage(data?.lastLog?.serial_rx || '')}</Row>
               <Row label="IO状态">{getIO(data?.lastLog?.serial_rx || '')}</Row>
               <Row label="模拟量状态">{getAnalogInput(data?.lastLog?.serial_rx || '')}</Row>
+              <Row label="温度">{getTemperature(data?.lastLog?.serial_rx || '')}</Row>
+              <Row label="湿度">{getHumidity(data?.lastLog?.serial_rx || '')}</Row>
             </CardHeader>
           </Card>
           <div className="col-span-1 md:col-span-2 lg:col-span-4">
@@ -224,6 +242,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 <Row label="接收数据">
                   <LongText text={base64Decode(data?.lastLog?.serial_rx || '')}/>
                 </Row>
+                <Row label="接收时间">{formattedDate(data?.lastLog?.update_time) || ''}</Row>
                 <Row label="发送数据">
                   <div className="relative w-full">
                     <input

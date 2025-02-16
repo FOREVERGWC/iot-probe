@@ -13,14 +13,14 @@ export const formattedDate = (date: any) => {
         return ''
     }
     const zonedDate = toZonedTime(date, timeZone);
-    return format(zonedDate, 'yyyy年MM月dd日 HH:mm:ss', { locale: zhCN });
+    return format(zonedDate, 'yyyy年MM月dd日 HH:mm:ss', {locale: zhCN});
 };
 
 /**
  * base64字符串解码
  * @param value 字符串
  */
-export const base64Decode = (value: string | null| undefined) => {
+export const base64Decode = (value: string | null | undefined) => {
     if (!value) {
         return ""
     }
@@ -78,9 +78,9 @@ export const extractContent = (value: string) => {
  */
 export const getPowerVoltage = (serial_rx: string) => {
     const value = base64Decode(serial_rx)
-    const data = extractContent(value);
-    if (!data) return '';
-    const content = data.split(';');
+    const data = extractContent(value)
+    if (!data) return ''
+    const content = data.split(';')
     const result = content.find(item => item.startsWith('A3:'));
     return `${result ? (+result.split(':')[1] * 11).toFixed(2) : ''} V`;
 }
@@ -91,9 +91,9 @@ export const getPowerVoltage = (serial_rx: string) => {
  */
 export const getSuperCapVoltage = (serial_rx: string) => {
     const value = base64Decode(serial_rx)
-    const data = extractContent(value);
-    if (!data) return '';
-    const content = data.split(';');
+    const data = extractContent(value)
+    if (!data) return ''
+    const content = data.split(';')
     const result = content.find(item => item.startsWith('A2:'));
     return `${result ? (+result.split(':')[1] * 11).toFixed(2) : ''} V`;
 }
@@ -104,9 +104,9 @@ export const getSuperCapVoltage = (serial_rx: string) => {
  */
 export const getIO = (serial_rx: string) => {
     const value = base64Decode(serial_rx)
-    const data = extractContent(value);
-    if (!data) return '';
-    const content = data.split(';');
+    const data = extractContent(value)
+    if (!data) return ''
+    const content = data.split(';')
     const result = content.find(item => item.startsWith('IO:'));
     if (!result) return '';
     const arr = result.split(':')[1].split('')
@@ -123,12 +123,38 @@ export const getIO = (serial_rx: string) => {
  */
 export const getAnalogInput = (serial_rx: string) => {
     const value = base64Decode(serial_rx)
-    const data = extractContent(value);
-    if (!data) return '';
-    const content = data.split(';');
+    const data = extractContent(value)
+    if (!data) return ''
+    const content = data.split(';')
     const a0 = content.find(item => item.startsWith('A0:'));
     const s0 = `A0: ${a0 ? a0.split(':')[1] : ''} V `;
     const a1 = content.find(item => item.startsWith('A1:'));
     const s1 = `A1: ${a1 ? a1.split(':')[1] : ''} V`;
     return s0 + s1;
+}
+
+/**
+ * 获取温度
+ * @param serial_rx 字符串
+ */
+export const getTemperature = (serial_rx: string) => {
+    const value = base64Decode(serial_rx)
+    const data = extractContent(value)
+    if (!data) return ''
+    const content = data.split(';')
+    const temperature = content.find(item => item.startsWith('T:'));
+    return `${temperature} °C`;
+}
+
+/**
+ * 获取湿度
+ * @param serial_rx 字符串
+ */
+export const getHumidity = (serial_rx: string) => {
+    const value = base64Decode(serial_rx)
+    const data = extractContent(value)
+    if (!data) return ''
+    const content = data.split(';')
+    const humidity = content.find(item => item.startsWith('R:'));
+    return `${humidity} %`;
 }
