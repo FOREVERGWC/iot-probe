@@ -120,7 +120,7 @@ export const columns4: ColumnDef<ChangeLog>[] = [
     //         const content = getDecodedContent(row);
     //         if (!content) return <p></p>;
     //         const data = content.find(item => item.startsWith('T:'));
-    //         const temperature = `${data ? data.split(':')[1] : ''} °C`;
+    //         const temperature = `${data ? data.split(':')[1] : ''} ℃`;
     //         return <p className="whitespace-nowrap">{temperature}</p>;
     //     },
     // },

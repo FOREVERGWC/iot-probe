@@ -143,7 +143,7 @@ export const getTemperature = (serial_rx: string) => {
     if (!data) return ''
     const content = data.split(';')
     const temperature = content.find(item => item.startsWith('T:'));
-    return `${temperature} °C`;
+    return `${temperature ? temperature.split(':')[1] : ''} ℃`;
 }
 
 /**
@@ -156,5 +156,5 @@ export const getHumidity = (serial_rx: string) => {
     if (!data) return ''
     const content = data.split(';')
     const humidity = content.find(item => item.startsWith('R:'));
-    return `${humidity} %`;
+    return `${humidity ? humidity.split(':')[1] : ''} %`;
 }
