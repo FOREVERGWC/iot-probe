@@ -43,6 +43,8 @@ import { saveAs } from "file-saver";
 import {useToast} from "@/components/ui/use-toast";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {Label} from "@/components/ui/label";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { toast } = useToast();
@@ -88,6 +90,13 @@ export default function Page({ params }: { params: { id: string } }) {
       [name]: !prevState[name],
     }));
   };
+
+  const handleRadioChange = (name: 'io1' | 'io2' | 'io3' | 'io4', value: string) => {
+    setCheckboxState((prevState) => ({
+      ...prevState,
+      [name]: value === 'true'
+    }));
+  }
 
   const handleBlur = async () => {
     setIsFocused(false)
@@ -264,26 +273,44 @@ export default function Page({ params }: { params: { id: string } }) {
                 {isFocused && (
                     <Row label="数字控制">
                       <div className="flex gap-x-24">
-                        <div className="flex items-center gap-x-0.5">
+                        <div className="flex items-center gap-x-2">
                           <label>IO1</label>
-                          <Checkbox
-                              checked={checkboxState.io1}
-                              onCheckedChange={() => handleCheckboxChange('io1')}
-                          />
+                          <RadioGroup onValueChange={(value) => handleRadioChange('io1', value)} defaultValue={String(checkboxState.io1)}>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="false" id="io1_0" />
+                              <Label htmlFor="0">低电平0</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="true" id="io1_1" />
+                              <Label htmlFor="1">高电平1</Label>
+                            </div>
+                          </RadioGroup>
                         </div>
-                        <div className="flex items-center gap-x-0.5">
+                        <div className="flex items-center gap-x-2">
                           <label>IO2</label>
-                          <Checkbox
-                              checked={checkboxState.io2}
-                              onCheckedChange={() => handleCheckboxChange('io2')}
-                          />
+                          <RadioGroup onValueChange={(value) => handleRadioChange('io2', value)} defaultValue={String(checkboxState.io2)}>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="false" id="io1_0" />
+                              <Label htmlFor="0">低电平0</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="true" id="io1_1" />
+                              <Label htmlFor="1">高电平1</Label>
+                            </div>
+                          </RadioGroup>
                         </div>
-                        <div className="flex items-center gap-x-0.5">
+                        <div className="flex items-center gap-x-2">
                           <label>IO3</label>
-                          <Checkbox
-                              checked={checkboxState.io3}
-                              onCheckedChange={() => handleCheckboxChange('io3')}
-                          />
+                          <RadioGroup onValueChange={(value) => handleRadioChange('io3', value)} defaultValue={String(checkboxState.io3)}>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="false" id="io1_0" />
+                              <Label htmlFor="0">低电平0</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="true" id="io1_1" />
+                              <Label htmlFor="1">高电平1</Label>
+                            </div>
+                          </RadioGroup>
                         </div>
                         <div className="flex items-center gap-x-0.5">
                           <label>发送控制字符串</label>
