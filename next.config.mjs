@@ -1,10 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output:"standalone",
-    transpilePackages: ['json-diff-ts'],
-    serverRuntimeConfig:{
+	output: 'standalone',
+	transpilePackages: ['json-diff-ts'],
+	serverRuntimeConfig: {}
+}
 
-    }
-};
-
-export default nextConfig;
+export default nextConfig

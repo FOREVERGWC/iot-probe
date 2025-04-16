@@ -3,12 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
+/// 设备
 model device {
+  /// 设备ID
   device_id            String  @id @db.VarChar(18)
   latest_device_log_id Int
   intranet_array       String  @db.VarChar(300)
@@ -16,13 +18,16 @@ model device {
   heartbeat            String  @db.VarChar(3)
   is_online            Boolean
   serial_tx            String  @db.VarChar(200)
-  alias_name           String  @db.VarChar(20) @default("")
+  alias_name           String  @default("") @db.VarChar(20)
   user_id              Int?
   user                 user?   @relation(fields: [user_id], references: [id])
+
   @@index([user_id])
 }
 
+/// 设备变更日志
 model device_change_log {
+  /// 主键ID
   id                  Int       @id @default(autoincrement())
   device_id           String?   @db.VarChar(18)
   device_log_before   Int
@@ -42,7 +47,9 @@ model device_change_log {
   extranet_ping_large Boolean?
 }
 
+/// 设备日志
 model device_log {
+  /// 主键ID
   id                  Int       @id @default(autoincrement())
   device_id           String?   @db.VarChar(18)
   update_time         DateTime? @db.DateTime(0)
@@ -64,46 +71,53 @@ model device_log {
   importance_level    Boolean?
 }
 
+/// 用户
 model user {
-  id                  Int       @id @default(autoincrement())
-  username            String    @db.VarChar(20)
-  password            String    @db.VarChar(80)
-  phone               String    @db.VarChar(20)
-  level               Int
-  remark              String    @db.VarChar(50) @default("")
-  user_role_links     user_role_link[]
-  devices             device[]
+  /// 主键ID
+  id              Int              @id @default(autoincrement())
+  username        String           @db.VarChar(20)
+  password        String           @db.VarChar(80)
+  phone           String           @db.VarChar(20)
+  level           Int
+  remark          String           @default("") @db.VarChar(50)
+  user_role_links user_role_link[]
+  devices         device[]
 }
 
 model role {
-  id                  Int       @id @default(autoincrement())
-  name                String    @db.VarChar(20)
-  sort                Int
-  status              Boolean   @default(true)
-  user_role_links     user_role_link[]
+  /// 主键ID
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(20)
+  sort            Int
+  status          Boolean          @default(true)
+  user_role_links user_role_link[]
 }
 
 model user_role_link {
-  id                  Int       @id @default(autoincrement())
-  user_id             Int
-  role_id             Int
-  user                user      @relation(fields: [user_id], references: [id])
-  role                role      @relation(fields: [role_id], references: [id])
+  /// 主键ID
+  id      Int  @id @default(autoincrement())
+  user_id Int
+  role_id Int
+  user    user @relation(fields: [user_id], references: [id])
+  role    role @relation(fields: [role_id], references: [id])
+
   @@index([user_id])
   @@index([role_id])
 }
 
 model code {
-  id                  Int       @id @default(autoincrement())
-  phone               String    @db.VarChar(20)
-  code                String    @db.VarChar(4)
-  expires_at          DateTime  @db.DateTime(0)
+  /// 主键ID
+  id         Int      @id @default(autoincrement())
+  phone      String   @db.VarChar(20)
+  code       String   @db.VarChar(4)
+  expires_at DateTime @db.DateTime(0)
 }
 
 model enclosure {
-  id                  Int       @id @default(autoincrement())
-  name                String    @db.VarChar(20)
-  key                 String    @db.VarChar(20)
-  file_path           String    @db.VarChar(50)
-  file_name           String    @db.VarChar(50)
+  /// 主键ID
+  id        Int    @id @default(autoincrement())
+  name      String @db.VarChar(20)
+  key       String @db.VarChar(20)
+  file_path String @db.VarChar(50)
+  file_name String @db.VarChar(50)
 }
