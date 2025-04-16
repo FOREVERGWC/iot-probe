@@ -1,12 +1,12 @@
-import './globals.css'
+import React from 'react'
 import { Inter as FontSans } from 'next/font/google'
 import { cn } from '@/libs/utils'
 import { SWRProvider } from '@/provider/swr.provider'
 import { Metadata } from 'next'
 import AuthProvider from '@/provider/auth.provider'
 import Navbar from '@/components/ui/navbar'
-import React from 'react'
 import { Toaster } from '@/components/ui/toaster'
+import './globals.css'
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 	description: '九溪云服务'
 }
 
-const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+const RootLayout: React.FC<Readonly<{ children: React.ReactNode }>> = ({ children }) => {
 	return (
 		<html lang="zh" className="h-full">
 			<body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
