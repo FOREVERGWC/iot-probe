@@ -47,7 +47,7 @@ export const appRouter = router({
 					.string()
 					.max(20)
 					.regex(/^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/, {
-						message: '无效的电话号码格式'
+						message: '无效的手机号格式'
 					}),
 				remark: z.string().max(50).optional(),
 				code: z.string().min(1)
@@ -159,7 +159,7 @@ export const appRouter = router({
 				phone: z
 					.string()
 					.max(20)
-					.regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, { message: '无效的电话号码格式' })
+					.regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, { message: '无效的手机号格式' })
 			})
 		)
 		.mutation(async ({ input }) => {
@@ -194,7 +194,7 @@ export const appRouter = router({
 			} as any
 
 			try {
-				const data = await client.SendSms(params)
+				// const data = await client.SendSms(params)
 
 				await prisma.code.create({
 					data: {
@@ -218,7 +218,7 @@ export const appRouter = router({
 					.string()
 					.max(20)
 					.regex(/^(\+?\d{1,4}[\s-]?)?(\(?\d{1,4}\)?[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$/, {
-						message: '无效的电话号码格式'
+						message: '无效的手机号格式'
 					}),
 				verificationCode: z.string().min(4),
 				newPassword: z

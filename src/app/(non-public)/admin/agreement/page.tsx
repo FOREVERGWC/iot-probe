@@ -2,10 +2,9 @@
 
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { api, fileApi } from '@/utils/trpc'
+import { api } from '@/utils/trpc'
 import Loading from '@/app/loading'
 import { useToast } from '@/components/ui/use-toast'
-import useSWR from 'swr'
 
 interface Enclosure {
 	id: number
@@ -15,7 +14,7 @@ interface Enclosure {
 	file_path: string
 }
 
-export default function Page() {
+const Page = () => {
 	const { toast } = useToast()
 	const { data, error, mutate } = api.enclosures.useSWR()
 	// const { trigger: uploadFileTrigger } = fileApi.upload.useSWRMutation();
@@ -134,3 +133,5 @@ export default function Page() {
 		</div>
 	)
 }
+
+export default Page

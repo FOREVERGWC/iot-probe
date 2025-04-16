@@ -24,16 +24,11 @@ interface PingData {
 const ipv4Regex =
 	/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
 
-export default function IntranetStatusCard({
-	deviceId,
-	intranetArray,
-	intranetPingArray,
-	onSuccess
-}: IntranetStatusCardProps) {
+const IntranetStatusCard = ({ deviceId, intranetArray, intranetPingArray, onSuccess }: IntranetStatusCardProps) => {
 	const existingIps = intranetArray ? intranetArray.split(',') : []
 	const pingData: PingData[] = intranetPingArray ? JSON.parse(intranetPingArray) : []
 
-	const [showInput, setShowInput] = useState(false)
+	const [showInput, setShowInput] = useState<boolean>(false)
 	const [newIp, setNewIp] = useState('')
 	const [error, setError] = useState<string | null>(null)
 	const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation()
@@ -145,3 +140,5 @@ export default function IntranetStatusCard({
 		</Card>
 	)
 }
+
+export default IntranetStatusCard

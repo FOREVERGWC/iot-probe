@@ -23,17 +23,17 @@ interface PingData {
 	speedLarge: string
 }
 
-export default function ExtranetStatusCard({
+const ExtranetStatusCard = ({
 	deviceId,
 	extranetArray,
 	extranetPing,
 	extranetPingLarge,
 	onSuccess
-}: ExtranetStatusCardProps) {
+}: ExtranetStatusCardProps) => {
 	const existingIps = extranetArray ? extranetArray.split(',') : []
 	const pingData: PingData[] = [{ extranetIP: existingIps[0], speed: extranetPing, speedLarge: extranetPingLarge }]
 
-	const [showInput, setShowInput] = useState(false)
+	const [showInput, setShowInput] = useState<boolean>(false)
 	const [newUrl, setNewUrl] = useState('')
 	const [error, setError] = useState<string | null>(null)
 	const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation()
@@ -154,3 +154,5 @@ export default function ExtranetStatusCard({
 		</Card>
 	)
 }
+
+export default ExtranetStatusCard

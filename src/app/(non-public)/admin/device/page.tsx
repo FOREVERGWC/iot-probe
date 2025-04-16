@@ -9,7 +9,7 @@ import * as React from 'react'
 import { useEffect } from 'react'
 import DeviceLogDialog from '@/app/(non-public)/admin/device/modules/DeviceLogDialog'
 
-export default function Page() {
+const Page = () => {
 	const { toast } = useToast()
 	const { data, error, mutate } = api.devices.useSWR()
 	const { trigger: unbindDeviceTrigger } = api.unbindDevice.useSWRMutation()
@@ -79,3 +79,5 @@ export default function Page() {
 		</div>
 	)
 }
+
+export default Page

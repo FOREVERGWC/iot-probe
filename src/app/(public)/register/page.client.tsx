@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from '@/utils/trpc'
 import { useToast } from '@/components/ui/use-toast'
+import { EnvelopeClosedIcon, LockClosedIcon, MobileIcon, PersonIcon } from '@radix-ui/react-icons'
 
 export const registerSchema = z.object({
 	username: z.string().min(1, { message: '用户名不能为空' }),
@@ -22,14 +23,14 @@ export const registerSchema = z.object({
 		}),
 	phone: z
 		.string()
-		.min(10, { message: '电话号码至少需要 10 个字符' })
+		.min(10, { message: '手机号至少需要 10 个字符' })
 		.regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, {
-			message: '无效的电话号码格式'
+			message: '无效的手机号格式'
 		}),
 	code: z.string().min(4, { message: '验证码至少需要 4 个字符' })
 })
 
-function RegisterForm() {
+const RegisterForm = () => {
 	const router = useRouter()
 	const { trigger: registerTrigger } = api.register.useSWRMutation()
 	const { trigger: sendVerificationTrigger } = api.sendVerificationCode.useSWRMutation()
@@ -44,8 +45,6 @@ function RegisterForm() {
 			code: ''
 		}
 	})
-
-	const [showPassword, setShowPassword] = useState(false)
 
 	const handleRegister = async (values: z.infer<typeof registerSchema>) => {
 		try {
@@ -78,7 +77,7 @@ function RegisterForm() {
 		if (!phoneValue) {
 			toast({
 				title: '发送失败',
-				description: '请先输入有效的电话号码。',
+				description: '请先输入有效的手机号。',
 				variant: 'destructive'
 			})
 			return
@@ -100,7 +99,10 @@ function RegisterForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input type="text" placeholder="用户名" {...field} />
+								<div className="relative">
+									<PersonIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="text" placeholder="用户名" {...field} className="pl-10" />
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -112,16 +114,9 @@ function RegisterForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<div className="relative space-y-2">
-									<Input type={showPassword ? 'text' : 'password'} placeholder="密码" {...field} />
-									<Button
-										type="button"
-										className="absolute bottom-1 right-1 h-7 w-7"
-										size="icon"
-										variant="ghost"
-										onClick={() => setShowPassword(!showPassword)}>
-										<span className={`${showPassword ? 'icon-[ph--eye-slash-bold]' : 'icon-[ph--eye-bold]'}`} />
-									</Button>
+								<div className="relative">
+									<LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="password" placeholder="密码" {...field} className="pl-10" />
 								</div>
 							</FormControl>
 							<FormMessage />
@@ -133,14 +128,17 @@ function RegisterForm() {
 					name="phone"
 					render={({ field }) => (
 						<FormItem>
-							<FormControl>
-								<div className="flex space-x-2">
-									<Input type="text" placeholder="手机" {...field} className="flex-grow" />
-									<Button type="button" onClick={handleSendCode} className="flex-shrink-0">
-										发送验证码
-									</Button>
-								</div>
-							</FormControl>
+							<div className="flex space-x-2">
+								<FormControl>
+									<div className="relative">
+										<MobileIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+										<Input type="text" placeholder="手机号" {...field} className="pl-10" />
+									</div>
+								</FormControl>
+								<Button type="button" onClick={handleSendCode}>
+									发送验证码
+								</Button>
+							</div>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -151,7 +149,10 @@ function RegisterForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input type="text" placeholder="验证码" {...field} />
+								<div className="relative">
+									<EnvelopeClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="text" placeholder="验证码" {...field} className="pl-10" />
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

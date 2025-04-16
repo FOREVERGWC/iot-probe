@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 
-export default function MsSpeed({ speed }: { speed: string }) {
+const MsSpeed = ({ speed }: { speed: string }) => {
 	return (
 		<>
 			{speed}
@@ -12,3 +12,5 @@ export default function MsSpeed({ speed }: { speed: string }) {
 		</>
 	)
 }
+
+export default MsSpeed

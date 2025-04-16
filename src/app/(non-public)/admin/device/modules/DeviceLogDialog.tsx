@@ -21,7 +21,7 @@ const deleteLogSchema = z.object({
 	num: z.number().min(1)
 })
 
-export default function DeviceLogDialog({ deviceId, onSuccess, children }: DeviceLogDialogProps) {
+const DeviceLogDialog = ({ deviceId, onSuccess, children }: DeviceLogDialogProps) => {
 	const { toast } = useToast()
 	const form = useForm<z.infer<typeof deleteLogSchema>>({
 		resolver: zodResolver(deleteLogSchema),
@@ -30,7 +30,7 @@ export default function DeviceLogDialog({ deviceId, onSuccess, children }: Devic
 			num: 1
 		}
 	})
-	const [open, setOpen] = useState(false)
+	const [open, setOpen] = useState<boolean>(false)
 	const { trigger: deleteDeviceLogsTrigger } = api.deleteDeviceLogs.useSWRMutation()
 
 	const handleSubmit = form.handleSubmit(async data => {
@@ -59,3 +59,5 @@ export default function DeviceLogDialog({ deviceId, onSuccess, children }: Devic
 		</Dialog>
 	)
 }
+
+export default DeviceLogDialog

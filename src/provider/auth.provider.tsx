@@ -29,7 +29,7 @@ const AuthContext = createContext<{
 	dispatch: () => null
 })
 
-function authReducer(state: AuthState, action: AuthAction): AuthState {
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 	switch (action.type) {
 		case 'LOGIN':
 			return {
@@ -52,12 +52,12 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 	}
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [state, dispatch] = useReducer(authReducer, initialAuthState)
 	const router = useRouter()
 	const pathname = usePathname()
 
-	const [isAuthInitialized, setAuthInitialized] = useState(false)
+	const [isAuthInitialized, setAuthInitialized] = useState<boolean>(false)
 
 	useEffect(() => {
 		const savedToken = localStorage.getItem('token')
@@ -108,6 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	return <AuthContext.Provider value={{ state, dispatch }}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export const useAuth = () => {
 	return useContext(AuthContext)
 }
+
+export default AuthProvider

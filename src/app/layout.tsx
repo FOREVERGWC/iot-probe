@@ -3,7 +3,7 @@ import { Inter as FontSans } from 'next/font/google'
 import { cn } from '@/libs/utils'
 import { SWRProvider } from '@/provider/swr.provider'
 import { Metadata } from 'next'
-import { AuthProvider } from '@/provider/auth.provider'
+import AuthProvider from '@/provider/auth.provider'
 import Navbar from '@/components/ui/navbar'
 import React from 'react'
 import { Toaster } from '@/components/ui/toaster'
@@ -14,16 +14,13 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-	title: '九溪云服务'
+	title: '九溪云服务',
+	description: '九溪云服务'
 }
 
-export default function RootLayout({
-	children
-}: Readonly<{
-	children: React.ReactNode
-}>) {
+const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
 	return (
-		<html lang="en">
+		<html lang="zh" className="h-full">
 			<body className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
 				<AuthProvider>
 					<Navbar />
@@ -42,3 +39,5 @@ export default function RootLayout({
 		</html>
 	)
 }
+
+export default RootLayout

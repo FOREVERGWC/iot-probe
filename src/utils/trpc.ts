@@ -5,7 +5,7 @@ import { createSWRProxyHooks } from '@trpc-swr/client'
 import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { FileRouter } from '@/server/file'
 
-function getBaseUrl() {
+const getBaseUrl = () => {
 	if (typeof window !== 'undefined')
 		// browser should use relative path
 		return ''

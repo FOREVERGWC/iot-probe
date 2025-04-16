@@ -5,7 +5,7 @@ import Loading from '@/app/loading'
 import * as React from 'react'
 import { useEffect } from 'react'
 
-export default function Page() {
+const Page = () => {
 	const { data, error, mutate } = api.server.useSWR()
 
 	useEffect(() => {
@@ -45,3 +45,5 @@ export default function Page() {
 		</div>
 	)
 }
+
+export default Page

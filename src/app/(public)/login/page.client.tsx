@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { z } from 'zod'
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { api } from '@/utils/trpc'
 import { useToast } from '@/components/ui/use-toast'
 import { useAuth } from '@/provider/auth.provider'
-import { Eye, EyeSlash } from 'phosphor-react'
+import { PersonIcon, LockClosedIcon } from '@radix-ui/react-icons'
 
 export const authSchema = z.object({
 	username: z.string().min(1, { message: '用户名不能为空' }),
@@ -20,7 +20,7 @@ export const authSchema = z.object({
 	rememberMe: z.boolean().optional()
 })
 
-function LoginForm() {
+const LoginForm = () => {
 	const { trigger: loginTrigger } = api.login.useSWRMutation()
 	const { toast } = useToast()
 	const router = useRouter()
@@ -34,8 +34,6 @@ function LoginForm() {
 			rememberMe: false
 		}
 	})
-
-	const [showPassword, setShowPassword] = useState(false)
 
 	const handleLogin = async (values: z.infer<typeof authSchema>) => {
 		try {
@@ -90,7 +88,10 @@ function LoginForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input type="text" placeholder="用户名" {...field} />
+								<div className="relative">
+									<PersonIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="text" placeholder="用户名" {...field} className="pl-10" />
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -102,16 +103,9 @@ function LoginForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<div className="relative space-y-1">
-									<Input type={showPassword ? 'text' : 'password'} placeholder="密码" {...field} />
-									<Button
-										type="button"
-										className="absolute bottom-1 right-1 h-7 w-7"
-										size="icon"
-										variant="ghost"
-										onClick={() => setShowPassword(!showPassword)}>
-										{showPassword ? <Eye size={16} weight="bold" /> : <EyeSlash size={16} weight="bold" />}
-									</Button>
+								<div className="relative">
+									<LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="password" placeholder="密码" {...field} className="pl-10" />
 								</div>
 							</FormControl>
 							<FormMessage />

@@ -6,7 +6,7 @@ import { TRPCClientError } from '@trpc/client'
 
 const JWT_SECRET = process.env.JWT_SECRET || ''
 
-export async function createContext({ req }: FetchCreateContextFnOptions) {
+export const createContext = async ({ req }: FetchCreateContextFnOptions) => {
 	let id: number = 0
 	let roleIdList: Array<number> = []
 	const authHeader = req.headers.get('Authorization')

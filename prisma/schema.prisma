@@ -51,24 +51,35 @@ model device_change_log {
 model device_log {
   /// 主键ID
   id                  Int       @id @default(autoincrement())
+  /// 设备ID
   device_id           String?   @db.VarChar(18)
-  update_time         DateTime? @db.DateTime(0)
   card_number         String?   @db.VarChar(15)
+  /// 电话卡唯一编号
   iccid               String?   @db.VarChar(21)
+  /// 供电状态
   electric            String?   @db.VarChar(15)
+  /// 探针有限网络状态
   ethernet            String?   @db.VarChar(15)
+  /// 探针IP
   ip                  String?   @db.VarChar(15)
+  /// 探针网关
   gateway             String?   @db.VarChar(15)
+  /// 内网延迟
   intranet_ping       String?   @db.VarChar(8)
+  /// 内网延迟（大数据包）
   intranet_ping_large String?   @db.VarChar(8)
+  /// 内网探针记录
   intranet_ping_array String?   @db.VarChar(300)
+  /// 外网延迟
   extranet_ping       String?   @db.VarChar(8)
+  /// 外网延迟（大数据包）
   extranet_ping_large String?   @db.VarChar(8)
   serial_rx           String?   @db.VarChar(1000)
   serial_tx           String?   @db.VarChar(200)
   signal_quality_rssi Int
   firmware_version    String    @db.VarChar(50)
   importance_level    Boolean?
+  update_time         DateTime? @db.DateTime(0)
 }
 
 /// 用户

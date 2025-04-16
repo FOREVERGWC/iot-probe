@@ -1,21 +1,23 @@
 'use client'
 
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from '@/utils/trpc'
 import { useToast } from '@/components/ui/use-toast'
+import { EnvelopeClosedIcon, LockClosedIcon, MobileIcon } from '@radix-ui/react-icons'
 
 export const forgotPasswordSchema = z.object({
 	phone: z
 		.string()
-		.min(10, { message: '电话号码至少需要 10 个字符' })
+		.min(10, { message: '手机号至少需要 10 个字符' })
 		.regex(/^(\+?\d{1,4}[\s-]?)?\(?\d{1,4}?\)?[\s-]?\d{1,4}[\s-]?\d{1,9}$/, {
-			message: '无效的电话号码格式'
+			message: '无效的手机号格式'
 		}),
 	verificationCode: z.string().min(4, { message: '验证码至少需要 4 个字符' }),
 	newPassword: z
@@ -27,7 +29,7 @@ export const forgotPasswordSchema = z.object({
 		})
 })
 
-function ForgotPasswordForm() {
+const ForgotPasswordForm = () => {
 	const { trigger: sendCodeTrigger } = api.sendVerificationCode.useSWRMutation()
 	const { trigger: resetPasswordTrigger } = api.resetPassword.useSWRMutation()
 	const { toast } = useToast() // 使用 Toast 的 hook
@@ -51,10 +53,10 @@ function ForgotPasswordForm() {
 				description: '请检查您的手机',
 				variant: 'default'
 			})
-		} catch (error) {
+		} catch (error: any) {
 			toast({
 				title: '发送验证码失败',
-				description: '请重试',
+				description: error?.message || '请重试',
 				variant: 'destructive'
 			})
 		}
@@ -69,10 +71,10 @@ function ForgotPasswordForm() {
 				variant: 'default'
 			})
 			router.push('/login')
-		} catch (error) {
+		} catch (error: any) {
 			toast({
 				title: '密码重置失败',
-				description: '请重试',
+				description: error?.message || '请重试',
 				variant: 'destructive'
 			})
 		}
@@ -88,7 +90,10 @@ function ForgotPasswordForm() {
 						<FormItem>
 							<div className="flex space-x-2">
 								<FormControl>
-									<Input type="text" placeholder="手机号" {...field} />
+									<div className="relative">
+										<MobileIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+										<Input type="text" placeholder="手机号" {...field} className="pl-10" />
+									</div>
 								</FormControl>
 								<Button type="button" onClick={handleSendCode}>
 									发送验证码
@@ -104,7 +109,10 @@ function ForgotPasswordForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input type="text" placeholder="验证码" {...field} />
+								<div className="relative">
+									<EnvelopeClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="text" placeholder="验证码" {...field} className="pl-10" />
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -116,7 +124,10 @@ function ForgotPasswordForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<Input type="password" placeholder="新密码" {...field} />
+								<div className="relative">
+									<LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+									<Input type="password" placeholder="新密码" {...field} className="pl-10" />
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

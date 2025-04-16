@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation'
 import { useAuth } from '@/provider/auth.provider'
 
-export default function Navbar() {
+const Navbar = () => {
 	const { state, dispatch } = useAuth()
 	const router = useRouter()
 
@@ -69,3 +69,5 @@ export default function Navbar() {
 		</NavigationMenu>
 	)
 }
+
+export default Navbar

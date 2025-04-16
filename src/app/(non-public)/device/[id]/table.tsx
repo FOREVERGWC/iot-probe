@@ -1,38 +1,60 @@
 'use client'
 
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-// const
 interface DeviceLog {
-	/* 日志主键 */
+	/**
+	 * 主键ID
+	 */
 	id: number
+	/**
+	 * 设备ID
+	 */
 	device_id: string | null
-	update_time: Date | null
 	card_number: string | null
-	/* 电话卡ID */
+	/**
+	 * 电话卡唯一编号
+	 */
 	iccid: string | null
-	/* 供电状态 */
+	/**
+	 * 供电状态
+	 */
 	electric: string | null
-	/* 探针有限网络状态 */
+	/**
+	 * 探针有限网络状态
+	 */
 	ethernet: 'phy_conn_error' | 'dhcp_timeout' | null
-	/* 探针IP */
+	/**
+	 * 探针IP
+	 */
 	ip: string | null
-	/* 探针网关 */
+	/**
+	 * 探针网关
+	 */
 	gateway: string | null
-	/* 内网延迟
-	 * >9000ms 断开 */
+	/**
+	 * 内网延迟
+	 */
 	intranet_ping: string | null
-	/* 内网延迟（大数据包） */
+	/**
+	 * 内网延迟（大数据包）
+	 */
 	intranet_ping_large: string | null
-	/* 内网探针记录 */
+	/**
+	 * 内网探针记录
+	 */
 	intranet_ping_array: string | null
-	/* 外网延迟 */
+	/**
+	 * 外网延迟
+	 */
 	extranet_ping: string | null
-	/* 外网延迟（大数据包） */
+	/**
+	 * 外网延迟（大数据包）
+	 */
 	extranet_ping_large: string | null
 	importance_level: number | null
+	update_time: Date | null
 }
 
 export const columns: ColumnDef<DeviceLog>[] = [
@@ -103,7 +125,7 @@ interface DataTableProps<TData, TValue> {
 	data: TData[]
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export const DataTable = <TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) => {
 	const table = useReactTable({
 		data,
 		columns,

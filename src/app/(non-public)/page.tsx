@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { api } from '@/utils/trpc'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import Loading from '@/components/loading'
 import { Button } from '@/components/ui/button'
@@ -16,7 +15,7 @@ import OnlineStatus from '@/app/(non-public)/device/modules/OnlineStatus'
 import { useToast } from '@/components/ui/use-toast'
 import * as React from 'react'
 
-export default function Home() {
+const Home = () => {
 	const { toast } = useToast()
 	const { data, mutate } = api.myDevices.useSWR()
 	const { data: serviceAgreement } = api.serviceAgreement.useSWR()
@@ -111,3 +110,5 @@ export default function Home() {
 		</main>
 	)
 }
+
+export default Home

@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { notFound, usePathname, useRouter } from 'next/navigation'
-import { Middleware, SWRConfig, SWRHook } from 'swr'
+import { usePathname, useRouter } from 'next/navigation'
+import { SWRConfig } from 'swr'
 
 // import routes from '@/routes'
 import { api } from '@/utils/trpc'

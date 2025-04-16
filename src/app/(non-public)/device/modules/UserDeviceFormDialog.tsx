@@ -15,14 +15,14 @@ type DeviceFormDialogProps = {
 	onSuccess?: () => void
 }
 
-export default function UserDeviceFormDialog({ deviceId, onSuccess, children }: DeviceFormDialogProps) {
+const UserDeviceFormDialog = ({ deviceId, onSuccess, children }: DeviceFormDialogProps) => {
 	const { state } = useAuth()
 	const { toast } = useToast()
 	const [deviceData, setDeviceData] = useState({
 		device_id: deviceId || '',
 		alias_name: ''
 	})
-	const [open, setOpen] = useState(false)
+	const [open, setOpen] = useState<boolean>(false)
 
 	const { data: existingDevice } = useSWR(
 		open && deviceId ? `/api/trpc/device?input=${encodeURIComponent(JSON.stringify({ id: deviceId }))}` : null
@@ -102,3 +102,5 @@ export default function UserDeviceFormDialog({ deviceId, onSuccess, children }: 
 		</Dialog>
 	)
 }
+
+export default UserDeviceFormDialog

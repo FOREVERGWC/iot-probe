@@ -30,7 +30,7 @@ import { saveAs } from 'file-saver'
 import { useToast } from '@/components/ui/use-toast'
 import { Checkbox } from '@/components/ui/checkbox'
 
-export default function Page({ params }: { params: { id: string } }) {
+const Page = ({ params }: { params: { id: string } }) => {
 	const { toast } = useToast()
 	const { data, mutate } = api.device.useSWR({ id: params.id })
 	const { trigger: updateDeviceTrigger } = api.updateDevice.useSWRMutation()
@@ -47,7 +47,7 @@ export default function Page({ params }: { params: { id: string } }) {
 	const { data: ethernetData, isLoading: isEthernetLoading } = api.deviceChangeLog.useSWR({
 		device_id: params.id
 	})
-	const [isFocused, setIsFocused] = useState(false)
+	const [isFocused, setIsFocused] = useState<boolean>(false)
 	const [checkboxState, setCheckboxState] = useState({
 		io1: false,
 		io2: false,
@@ -303,3 +303,5 @@ export default function Page({ params }: { params: { id: string } }) {
 		</div>
 	)
 }
+
+export default Page
